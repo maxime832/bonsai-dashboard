@@ -149,6 +149,73 @@ h2.sec{font-family:'DM Serif Display',serif;font-size:22px;color:#1B2A4A;font-we
     .map-stats .ms-l{color:rgba(255,255,255,.5);font-size:11px}
     .map-btn{background:rgba(255,255,255,.15);border-radius:10px;padding:12px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0}
   </style>
+  <style>
+    @media(max-width:1024px){
+      .wrap{padding:1.5rem 1rem}
+      .tiers{grid-template-columns:repeat(2,1fr)}
+      .timeline{grid-template-columns:repeat(2,1fr)}
+      .tl-header,.tl-body{border-radius:0 !important}
+      .why-grid{grid-template-columns:1fr}
+      .seq-steps{flex-wrap:wrap;gap:8px}
+      .seq-step{min-width:160px}
+      .seq-arrow{padding:0 3px;font-size:16px}
+    }
+    @media(max-width:640px){
+      .wrap{padding:1rem 0.75rem}
+      h1.main{font-size:24px}
+      h2.sec{font-size:18px}
+      .tiers{grid-template-columns:1fr;gap:12px}
+      .tier{padding:16px 14px}
+      .tier-price{font-size:28px}
+      .tier-badge{font-size:10px;padding:2px 10px}
+      .sim-grid{grid-template-columns:1fr;gap:16px}
+      .slider-row label{min-width:80px;font-size:12px}
+      .slider-row .val{min-width:36px;font-size:13px}
+      .metrics{grid-template-columns:1fr 1fr;gap:8px}
+      .met .met-val{font-size:22px}
+      .met.dark .met-val{font-size:26px}
+      .met{padding:12px 14px}
+      .met-label{font-size:10px}
+      .calc-table{display:block;overflow-x:auto;white-space:nowrap}
+      .formula{padding:14px 16px;font-size:12px}
+      .why-grid{grid-template-columns:1fr;gap:10px}
+      .timeline{grid-template-columns:1fr;gap:0}
+      .tl-header,.tl-body{border-radius:0 !important;min-height:auto}
+      .tl-body{padding:10px 14px}
+      .approach{grid-template-columns:1fr;gap:10px}
+      .msg-tabs{gap:0}
+      .msg-tab{padding:10px 10px;font-size:11px}
+      .msg-content{max-height:280px;font-size:12px;padding:14px 16px}
+      .seq{padding:16px 18px}
+      .seq-steps{flex-direction:column;gap:6px}
+      .seq-step{min-width:auto;width:100%}
+      .seq-arrow{display:none}
+      .map-banner{padding:20px 18px}
+      .map-stats{gap:12px;flex-wrap:wrap}
+      .map-stats .ms-n{font-size:18px}
+      .map-btn{margin-top:12px;align-self:stretch;justify-content:center}
+      .status-pills{gap:6px}
+      .status-pill{padding:4px 10px;font-size:11px}
+      .cat-filters{gap:4px}
+      .cat-btn{padding:4px 8px;font-size:10px}
+      .comp-row{padding:10px 12px}
+      .comp-right{align-items:stretch;width:100%;margin-top:8px}
+      .comp-select{min-width:auto;width:100%}
+      .comp-name{font-size:13px}
+      .comp-details{font-size:11px;gap:6px}
+      .conditions{font-size:11px;padding:10px 12px}
+      .bar{height:22px}
+      .bar div{font-size:9px}
+      .legend{gap:10px;font-size:11px}
+      .action-btns{flex-direction:column}
+      .btn-reset,.btn-export{width:100%;text-align:center}
+      .firebase-banner{padding:12px 14px}
+      .divider{margin:32px 0 24px}
+      .sync-bar{flex-direction:column;gap:6px;align-items:flex-start}
+      .mb-inner{flex-direction:column !important;align-items:flex-start !important;gap:16px !important}
+      .comp-top{flex-direction:column !important;gap:8px !important}
+    }
+  </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
@@ -504,7 +571,7 @@ function render(){
 
   // Map Banner Link
   var mb=h("a",{href:"https://maxime832.github.io/b2b/map_b2b_montgomery_4",target:"_blank",className:"map-banner"});
-  var mbInner=h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"}});
+  var mbInner=h("div",{className:"mb-inner",style:{display:"flex",alignItems:"center",justifyContent:"space-between"}});
   var mbLeft=h("div");
   var mbTitleRow=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}});
   mbTitleRow.appendChild(h("span",{style:{fontSize:"28px"}},"🗺️"));
@@ -588,7 +655,7 @@ function render(){
         var st=STATUSES.find(function(s2){return s2.id===state.statuses[c2.idx]})||STATUSES[0];
         var pot=POT_COLORS[c2.potential]||{bg:"#f5f5f5",t:"#666"};
         var row=h("div",{className:"comp-row"});
-        var top=h("div",{style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"12px"}});
+        var top=h("div",{className:"comp-top",style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"12px"}});
         var left=h("div",{style:{flex:"1",minWidth:"0"}});
         var nameRow=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"4px"}});
         nameRow.appendChild(h("span",{className:"comp-name"},c2.name));
