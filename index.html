@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonsai — Dashboard stratégique</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans','Helvetica Neue',sans-serif;background:#fff;color:#1a1a1a}
+.wrap{max-width:1200px;margin:0 auto;padding:2rem 1.5rem}
+h1.main{font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;color:#1B2A4A;letter-spacing:-.5px;margin-bottom:6px}
+h2.sec{font-family:'DM Serif Display',serif;font-size:22px;color:#1B2A4A;font-weight:400;margin:0 0 16px}
+.sub{color:#777;font-size:14px;margin-bottom:28px}
+.divider{margin:48px 0 32px;border-top:3px solid #C9A84C;padding-top:32px}
+/* Tier cards */
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:12px}
+.tier{background:#fff;border-radius:12px;padding:20px 18px;border:1px solid #e5e5e5;position:relative;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.tier.featured{border:2.5px solid #2A6DB5;box-shadow:0 4px 20px rgba(42,109,181,.12)}
+.tier-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#2A6DB5;color:#fff;font-size:11px;font-weight:700;padding:3px 14px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.tier-name{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.tier-price{font-size:36px;font-weight:700;color:#1B2A4A;line-height:1}
+.tier-price span{font-size:14px;font-weight:400;color:#999}
+.tier-sub{font-size:12px;color:#aaa;margin-bottom:14px}
+.tier-feat{border-top:1px solid #f0f0f0;padding-top:10px}
+.tier-feat div{font-size:13px;color:#555;line-height:1.7;padding-left:14px;position:relative}
+.tier-feat div::before{content:'›';position:absolute;left:0;font-weight:700}
+.conditions{background:#fafafa;border-radius:8px;padding:12px 16px;border:1px solid #eee;font-size:12px;color:#777;line-height:1.8;margin-bottom:32px}
+.conditions b{color:#555;font-weight:600}
+.conditions .parr{color:#6B5CE7;font-weight:600}
+/* Sliders */
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:20px}
+.slider-box{background:#fafafa;border-radius:12px;padding:20px 24px;border:1px solid #eee}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.slider-row .dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.slider-row label{font-size:13px;color:#555;min-width:100px}
+.slider-row input[type=range]{flex:1;height:6px;accent-color:var(--ac)}
+.slider-row .val{font-size:14px;font-weight:600;min-width:44px;text-align:right;color:#1B2A4A;font-variant-numeric:tabular-nums}
+.pct-total{margin-top:8px;font-size:13px;font-weight:600;text-align:right}
+/* Metrics */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.met{border-radius:12px;padding:18px 20px}
+.met.dark{background:#1B2A4A;color:#fff}
+.met.light{background:#f5f5f5}
+.met-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;opacity:.6}
+.met-val{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.met.dark .met-val{font-size:32px}
+.met-val span{font-size:14px;font-weight:400;opacity:.6}
+/* Bar */
+.bar{display:flex;height:28px;border-radius:8px;overflow:hidden;margin:16px 0 6px}
+.bar div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;transition:width .3s}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#888;margin-bottom:24px}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend .ld{width:10px;height:10px;border-radius:2px}
+/* Table */
+.calc-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px}
+.calc-table thead th{padding:10px 12px;background:#1B2A4A;color:#fff;font-weight:600;font-size:12px;text-align:right;border:none}
+.calc-table thead th:first-child{text-align:left}
+.calc-table td{padding:9px 12px;border-bottom:1px solid #f0f0f0;text-align:right;font-variant-numeric:tabular-nums}
+.calc-table td:first-child{text-align:left;font-weight:600;display:flex;align-items:center;gap:8px}
+.calc-table tr:nth-child(even){background:#f9f9f9}
+.calc-table tfoot td{background:#2A6DB5;color:#fff;font-weight:700;border:none}
+.calc-table tfoot td:first-child{display:table-cell}
+/* Formula */
+.formula{background:#fafafa;border-radius:12px;padding:20px 24px;border:1px solid #eee;margin-bottom:24px;font-size:13px;color:#555;line-height:1.8}
+.formula strong{color:#1B2A4A}
+/* Why cards */
+.why-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:0}
+.why-card{border-radius:12px;padding:18px 20px;border:1px solid #eee}
+.why-card .wt{font-size:14px;font-weight:700;margin-bottom:6px}
+.why-card .wd{font-size:12px;color:#666;line-height:1.65}
+/* Timeline */
+.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:32px}
+.tl-header{color:#fff;padding:14px 16px;display:flex;align-items:center;gap:8px;min-height:44px}
+.tl-header .tp{font-size:13px;font-weight:700}
+.tl-header .tph{font-size:11px;opacity:.85}
+.tl-body{padding:12px 16px;border:1px solid #eee;border-top:none;min-height:120px}
+.tl-body div{font-size:12px;color:#555;line-height:1.7;padding-left:12px;position:relative}
+.tl-body div::before{content:'›';position:absolute;left:0;font-weight:700}
+/* Approach cards */
+.approach{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px}
+.ap-card{border-radius:12px;border:1px solid #eee;overflow:hidden}
+.ap-head{color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.ap-body{padding:14px 16px}
+.ap-body .apl{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.ap-body .apv{font-size:13px;color:#333;margin-bottom:8px}
+.ap-offer{background:#f8f8f8;border-radius:6px;padding:8px 12px}
+.ap-offer .apo{font-size:12px;font-weight:600}
+/* Messages */
+.msg-wrap{border:1px solid #eee;border-radius:12px;overflow:hidden;margin-bottom:24px}
+.msg-tabs{display:flex;overflow-x:auto;background:#fafafa;border-bottom:1px solid #eee}
+.msg-tab{padding:12px 16px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:transparent;color:#888;border-bottom:3px solid transparent;white-space:nowrap;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px}
+.msg-tab.active{background:#fff;border-bottom-color:var(--tc)}
+.msg-variants{display:flex;gap:8px;margin-bottom:16px}
+.msg-pill{padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;border:none;font-family:'DM Sans',sans-serif;transition:all .2s}
+.msg-content{background:#fdfdfd;border:1px solid #eee;border-radius:8px;padding:18px 20px;font-size:13px;color:#444;line-height:1.75;white-space:pre-wrap;max-height:380px;overflow-y:auto}
+/* Sequence */
+.seq{background:#1B2A4A;border-radius:12px;padding:20px 24px;margin-top:24px}
+.seq-title{font-size:14px;font-weight:700;color:#C9A84C;margin-bottom:10px}
+.seq-steps{display:flex;align-items:center;flex-wrap:wrap}
+.seq-step{border-radius:8px;padding:10px 16px;min-width:200px}
+.seq-step .ss-d{font-size:11px;color:rgba(255,255,255,.6);font-weight:700}
+.seq-step .ss-l{font-size:13px;color:#fff;font-weight:500}
+.seq-arrow{color:rgba(255,255,255,.3);font-size:20px;padding:0 6px}
+.seq-rule{margin-top:14px;font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;font-style:italic}
+/* Tracker */
+.map-banner{display:block;text-decoration:none;margin-bottom:24px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#1B2A4A,#2A4A7A);padding:28px 32px;transition:transform .2s,box-shadow .2s;cursor:pointer}
+.map-banner:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(27,42,74,.25)}
+.map-stats{display:flex;gap:24px;margin-top:14px}
+.map-stats div span:first-child{display:block;color:#C9A84C;font-size:22px;font-weight:700}
+.map-stats div span:last-child{display:block;color:rgba(255,255,255,.5);font-size:11px}
+.map-btn{background:rgba(255,255,255,.15);border-radius:10px;padding:12px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;color:#fff;font-size:14px;font-weight:600}
+.sync-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:10px 16px;border-radius:8px}
+.sync-dot{width:8px;height:8px;border-radius:50%}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.status-pill{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid #eee;font-family:'DM Sans',sans-serif}
+.cat-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.cat-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .2s}
+.cat-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1B2A4A;cursor:pointer;transition:all .2s}
+.cat-header span{color:#fff;font-size:14px;font-weight:600}
+.cat-header .cnt{color:rgba(255,255,255,.5);font-size:12px}
+.cat-header .arr{color:#C9A84C;font-size:18px;transition:transform .2s}
+.comp-row{padding:12px 16px;border-bottom:1px solid #f0f0f0;transition:background .2s}
+.comp-row:nth-child(even){background:#fafafa}
+.comp-name{font-size:14px;font-weight:700;color:#1B2A4A}
+.comp-pot{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-block;margin-left:8px}
+.comp-sector{font-size:12px;color:#888;margin:3px 0}
+.comp-details{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#555}
+.comp-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.comp-select{padding:6px 28px 6px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;min-width:150px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M3 5l3 3 3-3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.note-field{flex:1;font-size:12px;padding:4px 8px;border-radius:4px;border:1px dashed #e0e0e0;cursor:pointer;min-height:24px;display:flex;align-items:center}
+.note-field.empty{color:#ccc;font-style:italic}
+.note-input{flex:1;padding:5px 10px;border-radius:6px;border:1px solid #ddd;font-size:12px;font-family:'DM Sans',sans-serif;outline:none}
+.note-ok{padding:5px 10px;border-radius:6px;border:none;background:#1B2A4A;color:#fff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600}
+.action-btns{display:flex;justify-content:flex-end;gap:8px;margin:12px 0 8px}
+.btn-reset{padding:6px 14px;border-radius:6px;border:1px solid #ddd;background:#fff;font-size:11px;color:#888;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-export{padding:6px 14px;border-radius:6px;border:1px solid #2A6DB5;background:#2A6DB5;font-size:11px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600}
+.firebase-banner{background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px}
+.empty-msg{text-align:center;padding:40px;color:#bbb;font-size:14px}
+.footer{margin-top:32px;border-top:1px solid #eee;padding-top:12px;text-align:center;font-size:11px;color:#bbb}
+</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <style>
+    #bonsai-map{height:450px;border-radius:12px;border:1px solid #eee;margin-bottom:24px;z-index:0}
+    .leaflet-popup-content{font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.5}
+    .leaflet-popup-content b{color:#1B2A4A;font-size:13px}
+    .leaflet-popup-content .mp-sector{color:#888;font-size:11px;margin:2px 0 6px}
+    .leaflet-popup-content .mp-row{margin:2px 0;color:#555}
+    .map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;font-size:11px}
+    .map-legend span{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;background:#f5f5f5;cursor:pointer;transition:opacity .2s}
+    .map-legend span.active{outline:2px solid #1B2A4A}
+    .map-legend .ml-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  </style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="wrap" id="map-host" style="display:none"><div id="bonsai-map"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+// ====== FIREBASE CONFIGURATION ======
+// 1. Allez sur https://console.firebase.google.com
+// 2. Créez un projet "bonsai-dashboard"
+// 3. Ajoutez une app Web, copiez les valeurs ci-dessous
+// 4. Activez Realtime Database en mode test
+var firebaseConfig = {
+  apiKey: "AIzaSyDvOXOuJ-gXY9F3UAqMw-X5H33sq83XDzw",
+  authDomain: "bonsai-dashboard-a02b5.firebaseapp.com",
+  projectId: "bonsai-dashboard-a02b5",
+  storageBucket: "bonsai-dashboard-a02b5.firebasestorage.app",
+  messagingSenderId: "549459573474",
+  appId: "1:549459573474:web:71bbdc51f040a05c057cbb",
+  measurementId: "G-ZX3RSCNFRY"
+};
+var FIREBASE_ON = firebaseConfig.apiKey !== "VOTRE_API_KEY";
+</script>
+<script>
+if (FIREBASE_ON) {
+  document.write('<scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-app-compat.min.js"><\/scr'+'ipt>');
+  document.write('<scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-database-compat.min.js"><\/scr'+'ipt>');
+}
+</script>
+<script>
+var COMPANIES = [{"cat": "1. Conseil & Big Four", "name": "KPMG EU Office", "sector": "Audit, conseil, fiscalité — Bureau EU", "address": "Rue d'Idalie 9/13, 1050 Bruxelles", "phone": "+32 2 708 43 00", "web": "www.kpmg.com/euservices", "contact": "HR Director / Head of People", "title": "Directeur RH EU Office", "email": "prenom.nom@kpmg.com", "employees": "200+", "potential": "Très élevé", "status": "À contacter", "notes": "Quartier européen. Budget RH structuré. Formule Corporate.", "lat": 50.839779, "lon": 4.40355}, {"cat": "1. Conseil & Big Four", "name": "Schuman Associates", "sector": "Conseil en affaires EU", "address": "Rue Archimède 5, 1000 Bruxelles", "phone": "+32 2 230 74 39", "web": "www.schumanassociates.com", "contact": "Managing Partner", "title": "Directeur Général", "email": "info@schumanassociates.com", "employees": "30-50", "potential": "Élevé", "status": "À contacter", "notes": "Cabinet influent Schuman. Formule Starter. Bon prescripteur réseau.", "lat": 50.84155, "lon": 4.380446}, {"cat": "1. Conseil & Big Four", "name": "The European Consulting Co.", "sector": "Conseil stratégique EU", "address": "Sint Michielswarande 13, 1040 Etterbeek", "phone": "+32 2 736 53 54", "web": "N/A", "contact": "Directeur Général", "title": "Managing Director", "email": "N/A", "employees": "20-40", "potential": "Moyen", "status": "À contacter", "notes": "Proximité immédiate Montgomery. Formule Starter.", "lat": 50.836473, "lon": 4.394353}, {"cat": "1. Conseil & Big Four", "name": "Intys Consulting", "sector": "Conseil IT & management", "address": "Av. de Tervueren 270, 1150 WSP", "phone": "+32 2 761 92 70", "web": "N/A", "contact": "Directeur Général", "title": "Managing Director", "email": "N/A", "employees": "30-50", "potential": "Moyen-élevé", "status": "À contacter", "notes": "Sur Av. Tervuren. Consultants IT qualifiés. Formule Starter.", "lat": 50.838857, "lon": 4.41079}, {"cat": "1. Conseil & Big Four", "name": "Kellen", "sector": "Association management & conseil EU", "address": "Av. de Tervueren 188a, 1150 WSP", "phone": "+32 2 761 16 00", "web": "N/A", "contact": "Managing Director", "title": "Directeur Bureau BXL", "email": "N/A", "employees": "30-50", "potential": "Moyen", "status": "À contacter", "notes": "Sur Av. Tervuren. Gestion d'associations. Formule Starter.", "lat": 50.839243, "lon": 4.406342}, {"cat": "1. Conseil & Big Four", "name": "Technopolis Group Belgium", "sector": "Conseil en innovation & policy", "address": "Av. de Broqueville 12, 1150 WSP", "phone": "+32 2 737 74 40", "web": "N/A", "contact": "Directeur", "title": "Directeur Belgique", "email": "N/A", "employees": "20-30", "potential": "Moyen", "status": "À contacter", "notes": "Directement Montgomery ! Conseil politique EU. Formule Starter.", "lat": 50.840437, "lon": 4.401011}, {"cat": "1. Conseil & Big Four", "name": "Cronos Europa", "sector": "IT Consulting & services", "address": "Av. des Arts 46, 1000 Bruxelles", "phone": "+32 2 548 12 10", "web": "N/A", "contact": "HR Manager", "title": "Responsable RH", "email": "N/A", "employees": "40-60", "potential": "Élevé", "status": "À contacter", "notes": "Grand groupe IT belge, quartier EU. Formule Business.", "lat": 50.844053, "lon": 4.371398}, {"cat": "2. Institutions EU", "name": "Commission Européenne", "sector": "Institution EU — Exécutif", "address": "Rue de la Loi 200, 1040 Bruxelles", "phone": "+32 2 299 11 11", "web": "ec.europa.eu", "contact": "Comité du Personnel / DG HR", "title": "Président Comité du Personnel", "email": "Via formulaire interne", "employees": "32.000+", "potential": "Très élevé", "status": "À contacter", "notes": "Comités du personnel (CLP). Allocation bien-être ~30€/mois. Volume massif.", "lat": 50.8433, "lon": 4.37509}, {"cat": "2. Institutions EU", "name": "Conseil de l'Union Européenne", "sector": "Institution EU — Législatif", "address": "Rue de la Loi 175, 1040 Bruxelles", "phone": "+32 2 281 61 11", "web": "consilium.europa.eu", "contact": "Comité du Personnel / Service Social", "title": "Resp. activités sociales", "email": "Via formulaire interne", "employees": "3.500+", "potential": "Très élevé", "status": "À contacter", "notes": "Cibler service social et comité du personnel. Fournisseur agréé.", "lat": 50.842441, "lon": 4.375179}, {"cat": "2. Institutions EU", "name": "SEAE (EEAS)", "sector": "Service diplomatique EU", "address": "Rdpt Robert Schuman 9, 1046 Bruxelles", "phone": "+32 2 584 11 11", "web": "eeas.europa.eu", "contact": "Head of Administration", "title": "Chef d'Administration", "email": "Via formulaire EEAS", "employees": "4.000+", "potential": "Très élevé", "status": "À contacter", "notes": "Personnel diplomatique haut revenu. Allocation sport.", "lat": 50.843119, "lon": 4.382013}, {"cat": "2. Institutions EU", "name": "Parlement Européen (Bureau BXL)", "sector": "Institution EU — Législatif", "address": "Rue Wiertz 60, 1047 Bruxelles", "phone": "+32 2 284 21 11", "web": "europarl.europa.eu", "contact": "DG Personnel / Sports Club PE", "title": "Resp. Sports & Loisirs", "email": "Via formulaire PE", "employees": "8.000+", "potential": "Élevé", "status": "À contacter", "notes": "Assistants parlementaires = cible prioritaire.", "lat": 50.838612, "lon": 4.373396}, {"cat": "2. Institutions EU", "name": "Comité Économique et Social EU", "sector": "Institution EU — Consultatif", "address": "Rue Belliard 99, 1040 Bruxelles", "phone": "+32 2 546 90 11", "web": "eesc.europa.eu", "contact": "Service RH / Comité du Personnel", "title": "Responsable RH", "email": "Via formulaire interne", "employees": "700+", "potential": "Moyen", "status": "À contacter", "notes": "Plus petite structure, décision rapide. Formule Starter/Business.", "lat": 50.839681, "lon": 4.372311}, {"cat": "3. Cabinets d'avocats", "name": "Loyens & Loeff", "sector": "Droit des affaires, fiscal", "address": "Av. de Tervueren 2, 1040 Etterbeek", "phone": "+32 2 743 43 43", "web": "www.loyensloeff.com", "contact": "Office Manager / HR Manager", "title": "Resp. RH Bruxelles", "email": "prenom.nom@loyensloeff.com", "employees": "100-150", "potential": "Très élevé", "status": "À contacter", "notes": "Directement Av. Tervuren ! Formule Business.", "lat": 50.839098, "lon": 4.397317}, {"cat": "3. Cabinets d'avocats", "name": "Cleary Gottlieb", "sector": "Droit concurrence EU", "address": "Rue de la Loi 57, 1040 Bruxelles", "phone": "+32 2 287 20 00", "web": "www.clearygottlieb.com", "contact": "Brussels Office Administrator", "title": "Office Manager", "email": "bruxelles@cgsh.com", "employees": "80-120", "potential": "Très élevé", "status": "À contacter", "notes": "Magic Circle US. Quartier EU. Formule Business.", "lat": 50.842185, "lon": 4.374193}, {"cat": "3. Cabinets d'avocats", "name": "Monard Law Brussels", "sector": "Droit des affaires, corp.", "address": "Av. de Tervueren 270, 1150 WSP", "phone": "+32 2 234 67 10", "web": "www.monardlaw.be", "contact": "HR Manager Brussels", "title": "Responsable RH", "email": "N/A", "employees": "50-80", "potential": "Élevé", "status": "À contacter", "notes": "Sur Av. Tervuren ! Grand cabinet belge. Formule Starter/Business.", "lat": 50.839418, "lon": 4.410314}, {"cat": "3. Cabinets d'avocats", "name": "Fieldfisher Brussels", "sector": "Droit EU, tech, énergie", "address": "Bd Louis Schmidt 29, 1040 Bruxelles", "phone": "+32 2 742 70 00", "web": "www.fieldfisher.com", "contact": "Brussels Office Manager", "title": "Office Manager / HR", "email": "brussels@fieldfisher.com", "employees": "50-80", "potential": "Élevé", "status": "À contacter", "notes": "Proximité Mérode/Montgomery. Formule Starter.", "lat": 50.836614, "lon": 4.389459}, {"cat": "3. Cabinets d'avocats", "name": "Stibbe Brussels", "sector": "Droit des affaires", "address": "Rue de Loxum 25, 1000 Bruxelles", "phone": "+32 2 533 52 11", "web": "www.stibbe.com", "contact": "HR Manager Brussels", "title": "Responsable RH", "email": "prenom.nom@stibbe.com", "employees": "100-150", "potential": "Élevé", "status": "À contacter", "notes": "Grand cabinet Benelux quartier EU.", "lat": 50.844072, "lon": 4.365946}, {"cat": "3. Cabinets d'avocats", "name": "Linklaters Brussels", "sector": "Droit des affaires, M&A", "address": "Rue Brederode 13, 1000 Bruxelles", "phone": "+32 2 501 94 11", "web": "www.linklaters.com", "contact": "HR Business Partner Brussels", "title": "HRBP Bruxelles", "email": "prenom.nom@linklaters.com", "employees": "80-120", "potential": "Élevé", "status": "À contacter", "notes": "Magic Circle UK. Programme well-being global.", "lat": 50.842757, "lon": 4.362104}, {"cat": "3. Cabinets d'avocats", "name": "Herbert Smith Freehills", "sector": "Droit des affaires intl.", "address": "Rue de Loxum 25, 1000 Bruxelles", "phone": "+32 2 511 74 50", "web": "www.herbertsmithfreehills.com", "contact": "HR Coordinator Brussels", "title": "Coordinateur RH", "email": "brussels@hsf.com", "employees": "40-60", "potential": "Moyen-élevé", "status": "À contacter", "notes": "Cabinet australien, culture sport. Formule Starter.", "lat": 50.844659, "lon": 4.365237}, {"cat": "3. Cabinets d'avocats", "name": "Delacroix et Associés", "sector": "Droit civil, immobilier, famille", "address": "Av. Boileau 2, 1040 Etterbeek", "phone": "+32 2 736 99 14", "web": "N/A", "contact": "Associé gérant", "title": "Managing Partner", "email": "N/A", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "Cabinet local Etterbeek. Formule Starter mini.", "lat": 50.834723, "lon": 4.395155}, {"cat": "3. Cabinets d'avocats", "name": "LEXPAT", "sector": "Immigration & droit des étrangers", "address": "Bd Saint-Michel 65, 1040 Etterbeek", "phone": "+32 2 315 58 73", "web": "N/A", "contact": "Associé fondateur", "title": "Fondatrice", "email": "N/A", "employees": "10-20", "potential": "Faible-moyen", "status": "À contacter", "notes": "Spécialisé expats. Proximité Montgomery.", "lat": 50.835409, "lon": 4.395092}, {"cat": "3. Cabinets d'avocats", "name": "Cabinet Bonhivers", "sector": "Droit civil, commercial", "address": "Av. de Tervueren 273, 1150 WSP", "phone": "+32 2 771 12 80", "web": "N/A", "contact": "Associé gérant", "title": "Managing Partner", "email": "info@bonhivers.be", "employees": "10-20", "potential": "Moyen", "status": "À contacter", "notes": "Directement Av. Tervuren. Approche terrain.", "lat": 50.839146, "lon": 4.410603}, {"cat": "4. Finance & Banques", "name": "Delen Private Bank Brussels", "sector": "Private Banking", "address": "Av. de Tervueren 72, 1040 Bruxelles", "phone": "+32 2 511 84 10", "web": "www.delen.be", "contact": "Directeur agence / Relationship Manager", "title": "Directeur Bureau BXL", "email": "N/A", "employees": "30-50", "potential": "Très élevé", "status": "À contacter", "notes": "Sur Av. Tervuren ! Banque privée haut de gamme. Synergie parfaite Bonsai. Formule Business.", "lat": 50.840177, "lon": 4.40045}, {"cat": "4. Finance & Banques", "name": "Belfius Montgomery", "sector": "Banque de détail", "address": "Av. de Tervueren 255, 1150 Bruxelles", "phone": "+32 2 743 31 80", "web": "www.belfius.be", "contact": "Directeur d'agence", "title": "Directeur Agence", "email": "N/A", "employees": "15-25", "potential": "Élevé", "status": "À contacter", "notes": "Directement Av. Tervuren Montgomery. Plans cafétéria. Formule Starter.", "lat": 50.840078, "lon": 4.409716}, {"cat": "4. Finance & Banques", "name": "Belfius Private House WSP", "sector": "Private banking", "address": "Av. de Tervueren 361/363, 1150 WSP", "phone": "N/A", "web": "www.belfius.be", "contact": "Directeur Private Banking", "title": "Directeur Centre Private", "email": "N/A", "employees": "15-25", "potential": "Élevé", "status": "À contacter", "notes": "Private banking Av. Tervuren. Clientèle premium = synergie Bonsai.", "lat": 50.838781, "lon": 4.41508}, {"cat": "4. Finance & Banques", "name": "BNP Paribas Fortis (Schuman)", "sector": "Banque de détail & corporate", "address": "Rdpt Robert Schuman 10, 1040 Etterbeek", "phone": "+32 2 762 20 00", "web": "www.bnpparibasfortis.be", "contact": "HR Regional Manager", "title": "Resp. RH Régional", "email": "Via site corporate", "employees": "200+", "potential": "Élevé", "status": "À contacter", "notes": "Siège régional. Plans cafétéria existants. Accord-cadre.", "lat": 50.84224, "lon": 4.382419}, {"cat": "4. Finance & Banques", "name": "BNP Paribas Fortis Private Banking", "sector": "Private Banking", "address": "Av. de Tervueren 270, 1150 WSP", "phone": "+32 2 312 47 81", "web": "www.bnpparibasfortis.be", "contact": "Directeur Centre", "title": "Directeur de Centre", "email": "Via site corporate", "employees": "30-50", "potential": "Élevé", "status": "À contacter", "notes": "Av. Tervuren. Clientèle premium.", "lat": 50.840038, "lon": 4.4108}, {"cat": "4. Finance & Banques", "name": "KBC Mérode", "sector": "Banque", "address": "Av. de Tervueren 16, 1040 Etterbeek", "phone": "+32 2 743 35 70", "web": "www.kbc.be", "contact": "Directeur d'agence", "title": "Directeur Agence", "email": "N/A", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "Directement Av. Tervuren/Mérode. Approche locale.", "lat": 50.840182, "lon": 4.398081}, {"cat": "4. Finance & Banques", "name": "KBC Meudon", "sector": "Banque", "address": "Av. du Roi Chevalier 56, 1200 WSL", "phone": "+32 2 775 67 50", "web": "www.kbc.be", "contact": "Directeur d'agence", "title": "Directeur Agence", "email": "N/A", "employees": "10-15", "potential": "Moyen", "status": "À contacter", "notes": "Quartier Meudon/Woluwe. Approche locale.", "lat": 50.847342, "lon": 4.426458}, {"cat": "4. Finance & Banques", "name": "KBC Chienvert", "sector": "Banque", "address": "Av. Jules de Trooz 5, 1150 WSP", "phone": "+32 2 761 00 40", "web": "www.kbc.be", "contact": "Directeur d'agence", "title": "Directeur Agence", "email": "N/A", "employees": "10-15", "potential": "Faible-moyen", "status": "À contacter", "notes": "WSP. Petite agence locale.", "lat": 50.839327, "lon": 4.407759}, {"cat": "4. Finance & Banques", "name": "Ethias Woluwe", "sector": "Assurance", "address": "Bd de la Woluwe 2, 1150 WSP", "phone": "+32 2 227 99 11", "web": "www.ethias.be", "contact": "Directeur régional / Agency Manager", "title": "Directeur Agence", "email": "N/A", "employees": "30-50", "potential": "Élevé", "status": "À contacter", "notes": "Grande agence d'assurance WSP. Personnel nombreux. Formule Starter/Business.", "lat": 50.838979, "lon": 4.41328}, {"cat": "4. Finance & Banques", "name": "ING Meudon", "sector": "Banque", "address": "Av. Georges Henri 178, 1200 WSL", "phone": "+32 2 464 60 02", "web": "www.ing.be", "contact": "Directeur d'agence", "title": "Directeur Agence", "email": "N/A", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "Quartier Meudon/Woluwe. Approche locale.", "lat": 50.846114, "lon": 4.421369}, {"cat": "4. Finance & Banques", "name": "Financial Center Montgomery", "sector": "Services financiers", "address": "Av. de Tervueren 142, 1150 Bruxelles", "phone": "+32 2 551 99 20", "web": "N/A", "contact": "Directeur", "title": "Directeur", "email": "N/A", "employees": "20-30", "potential": "Moyen", "status": "À contacter", "notes": "Cœur Montgomery. Proximité immédiate.", "lat": 50.838966, "lon": 4.404309}, {"cat": "4. Finance & Banques", "name": "Assurfina", "sector": "Courtage en assurances", "address": "Av. de Tervueren 333, 1150 WSP", "phone": "+32 2 772 95 05", "web": "www.assurfina.com", "contact": "Gérant / Directeur", "title": "Directeur Commercial", "email": "info@assurfina.com", "employees": "10-20", "potential": "Moyen", "status": "À contacter", "notes": "Av. Tervuren. Formule Starter. Approche terrain.", "lat": 50.839042, "lon": 4.413641}, {"cat": "4. Finance & Banques", "name": "Fintro WSP", "sector": "Banque", "address": "Rue René Declercq 59, 1150 WSP", "phone": "+32 2 770 54 54", "web": "www.fintro.be", "contact": "Resp. d'agence", "title": "Directeur d'agence", "email": "Via site Fintro", "employees": "10-15", "potential": "Faible-moyen", "status": "À contacter", "notes": "Agence locale WSP.", "lat": 50.836631, "lon": 4.414535}, {"cat": "5. Multinationales", "name": "Mitsui AgriScience Intl.", "sector": "Agrochimie — Siège EU", "address": "Av. de Tervueren 270, 1150 WSP", "phone": "+32 2 761 94 42", "web": "www.mitsui.com", "contact": "HR Manager Europe", "title": "Resp. RH Europe", "email": "Via site corporate", "employees": "30-60", "potential": "Élevé", "status": "À contacter", "notes": "Siège EU Av. Tervuren. Culture bien-être japonaise. Formule Starter/Business.", "lat": 50.838794, "lon": 4.410441}, {"cat": "5. Multinationales", "name": "Serco Europe", "sector": "Services externalisés EU", "address": "Chau. de Wavre 1945, 1160 Auderghem", "phone": "+32 470 70 35 79", "web": "www.serco.com", "contact": "HR Director Europe", "title": "Directeur RH Europe", "email": "Via site corporate", "employees": "200-400", "potential": "Élevé", "status": "À contacter", "notes": "Grand employeur proche Montgomery. Formule Corporate.", "lat": 50.823753, "lon": 4.418629}, {"cat": "5. Multinationales", "name": "IOGP", "sector": "Fédération pétrole & gaz intl.", "address": "Av. de Tervueren 188A, 1150 WSP", "phone": "+32 2 790 77 62", "web": "www.iogp.org", "contact": "Office Manager", "title": "Secrétaire Général", "email": "reception@iogp.org", "employees": "30-50", "potential": "Moyen-élevé", "status": "À contacter", "notes": "Av. Tervuren. Personnel qualifié international. Formule Starter.", "lat": 50.840276, "lon": 4.406327}, {"cat": "6. Tech & Digital", "name": "Google Brussels", "sector": "Tech — EU Policy", "address": "Chau. d'Etterbeek 180, 1040 Etterbeek", "phone": "N/A", "web": "www.google.com", "contact": "Office Manager / People Ops", "title": "People Operations Manager", "email": "Via LinkedIn", "employees": "50-100", "potential": "Très élevé", "status": "À contacter", "notes": "Bureau policy EU. Budgets well-being très élevés. Formule Business.", "lat": 50.837829, "lon": 4.385918}, {"cat": "6. Tech & Digital", "name": "Microsoft Brussels", "sector": "Tech — EU Affairs", "address": "Rue Montoyer 51, 1000 Bruxelles", "phone": "N/A", "web": "www.microsoft.com", "contact": "Office Manager / HR Brussels", "title": "Resp. RH local", "email": "Via LinkedIn", "employees": "30-60", "potential": "Élevé", "status": "À contacter", "notes": "Bureau EU affairs. Programme Microsoft Life. Formule Starter/Business.", "lat": 50.84053, "lon": 4.368493}, {"cat": "6. Tech & Digital", "name": "Amazon EU Policy", "sector": "Tech — Policy EU", "address": "Rue des Colonies 56, 1000 Bruxelles", "phone": "N/A", "web": "www.amazon.jobs", "contact": "Office Manager Brussels", "title": "Office Manager", "email": "Via LinkedIn", "employees": "40-80", "potential": "Élevé", "status": "À contacter", "notes": "Bureau lobbying EU. Avantages généreux. Formule Business.", "lat": 50.848123, "lon": 4.358525}, {"cat": "6. Tech & Digital", "name": "NYN IT Consulting", "sector": "Développement logiciel", "address": "Av. Jan Olieslagers 7, 1150 WSP", "phone": "+32 478 65 58 44", "web": "N/A", "contact": "CEO & Fondateur", "title": "CEO", "email": "info@nynit.com", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "PME tech locale WSP. Formule Starter dès 5 employés.", "lat": 50.839169, "lon": 4.410796}, {"cat": "6. Tech & Digital", "name": "MyNextCompany", "sector": "Recrutement IT", "address": "Tervurenlaan 412, 1150 WSP", "phone": "+32 2 588 43 30", "web": "www.mynextcompany.eu", "contact": "CEO", "title": "Directeur Général", "email": "info@mynextcompany.eu", "employees": "20-40", "potential": "Moyen", "status": "À contacter", "notes": "Recrutement tech, Av. Tervuren. Formule Starter.", "lat": 50.839955, "lon": 4.417459}, {"cat": "7. Lobbying & PA", "name": "Grayling Brussels", "sector": "Communication & PA", "address": "Rue Belliard 12, 1040 Bruxelles", "phone": "+32 2 732 70 40", "web": "www.grayling.com", "contact": "Managing Director Brussels", "title": "Directeur Bureau BXL", "email": "brussels@grayling.com", "employees": "30-50", "potential": "Élevé", "status": "À contacter", "notes": "Agence PA majeure. Équipes jeunes. Bon prescripteur.", "lat": 50.840995, "lon": 4.373019}, {"cat": "7. Lobbying & PA", "name": "FTI Consulting Brussels", "sector": "Conseil stratégique & comm.", "address": "Rue Montoyer 10, 1000 Bruxelles", "phone": "+32 2 289 09 30", "web": "www.fticonsulting.com", "contact": "Head of Brussels Office", "title": "Directeur Bureau BXL", "email": "brussels@fticonsulting.com", "employees": "40-60", "potential": "Élevé", "status": "À contacter", "notes": "Grand cabinet conseil. Formule Business.", "lat": 50.840182, "lon": 4.368094}, {"cat": "7. Lobbying & PA", "name": "Athenora Consulting", "sector": "Conseil EU, lobbying", "address": "Av. de Cortenbergh 66, 1000 Bruxelles", "phone": "+32 2 280 28 01", "web": "www.athenora.com", "contact": "Managing Partner", "title": "Associé gérant", "email": "info@athenora.com", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "Proche Schuman. Formule Starter.", "lat": 50.843219, "lon": 4.383255}, {"cat": "7. Lobbying & PA", "name": "Political Intelligence", "sector": "Veille politique EU", "address": "Rue de la Loi 38, 1000 Bruxelles", "phone": "+32 2 789 66 22", "web": "N/A", "contact": "Managing Director", "title": "Directeur Général", "email": "N/A", "employees": "20-30", "potential": "Moyen", "status": "À contacter", "notes": "Veille politique EU. Formule Starter.", "lat": 50.843584, "lon": 4.374844}, {"cat": "7. Lobbying & PA", "name": "logos Public Affairs", "sector": "Public affairs EU", "address": "Av. des Arts 47, 1000 Bruxelles", "phone": "+32 2 320 25 24", "web": "N/A", "contact": "Managing Director", "title": "Directeur Général", "email": "N/A", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "PA EU quartier européen. Formule Starter.", "lat": 50.844127, "lon": 4.371763}, {"cat": "7. Lobbying & PA", "name": "Publyon EU", "sector": "Conseil fonds EU", "address": "Rue du Commerce 31, 1000 Bruxelles", "phone": "+32 499 65 13 13", "web": "N/A", "contact": "Founder", "title": "Fondateur", "email": "N/A", "employees": "10-20", "potential": "Faible-moyen", "status": "À contacter", "notes": "Petite structure. Approche réseau/événement.", "lat": 50.840992, "lon": 4.368058}, {"cat": "8. Ambassades", "name": "Ambassade du Pérou", "sector": "Diplomatie", "address": "Av. de Tervueren 212, 1150 WSP", "phone": "+32 2 733 33 19", "web": "N/A", "contact": "Chef de chancellerie", "title": "Chef Chancellerie", "email": "Via ambassade", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "Av. Tervuren. Note verbale diplomatique.", "lat": 50.839377, "lon": 4.407573}, {"cat": "8. Ambassades", "name": "Ambassade du Nigeria", "sector": "Diplomatie", "address": "Av. de Tervueren 288, 1150 WSP", "phone": "+32 2 762 52 00", "web": "www.nigeriabrussels.org", "contact": "Attaché administratif", "title": "Chef Administratif", "email": "info@nigeriaembassy.be", "employees": "30-50", "potential": "Moyen", "status": "À contacter", "notes": "Grande ambassade. Formule Starter.", "lat": 50.840293, "lon": 4.411674}, {"cat": "8. Ambassades", "name": "Ambassade d'Indonésie", "sector": "Diplomatie", "address": "Av. de Tervueren 294, 1150 WSP", "phone": "+32 2 771 20 14", "web": "N/A", "contact": "Attaché administratif", "title": "Conseiller Administratif", "email": "Via ambassade", "employees": "20-30", "potential": "Moyen", "status": "À contacter", "notes": "Av. Tervuren.", "lat": 50.839849, "lon": 4.411733}, {"cat": "8. Ambassades", "name": "Ambassade du Togo", "sector": "Diplomatie", "address": "Av. de Tervueren 264, 1150 WSP", "phone": "+32 2 770 17 91", "web": "ambatogobruxelles.be", "contact": "1er Conseiller", "title": "Premier Conseiller", "email": "Via ambassade", "employees": "10-20", "potential": "Faible-moyen", "status": "À contacter", "notes": "Av. Tervuren.", "lat": 50.839175, "lon": 4.409993}, {"cat": "8. Ambassades", "name": "Ambassade du Botswana", "sector": "Diplomatie", "address": "Av. de Tervueren 169, 1150 WSP", "phone": "+32 2 735 20 70", "web": "N/A", "contact": "Attaché administratif", "title": "Chef Administratif", "email": "Via ambassade", "employees": "10-15", "potential": "Faible-moyen", "status": "À contacter", "notes": "Proche Montgomery.", "lat": 50.839627, "lon": 4.405731}, {"cat": "8. Ambassades", "name": "Ambassade d'Ouganda", "sector": "Diplomatie", "address": "Av. de Tervueren 317, 1150 WSP", "phone": "+32 2 762 58 25", "web": "brussels.mofa.go.ug", "contact": "Attaché administratif", "title": "Chef Administratif", "email": "Via ambassade", "employees": "15-25", "potential": "Moyen", "status": "À contacter", "notes": "Av. Tervuren.", "lat": 50.839897, "lon": 4.412875}, {"cat": "8. Ambassades", "name": "Ambassade de Chine", "sector": "Diplomatie", "address": "Av. de Tervueren 443, 1160 WSP", "phone": "+32 2 771 20 38", "web": "be.chineseembassy.org", "contact": "Attaché culturel", "title": "Conseiller", "email": "Via ambassade", "employees": "50-80", "potential": "Moyen", "status": "À contacter", "notes": "Grande ambassade, personnel nombreux.", "lat": 50.839635, "lon": 4.418884}, {"cat": "8. Ambassades", "name": "Section consulaire d'Iran", "sector": "Diplomatie", "address": "Av. de Tervueren 415, 1150 WSP", "phone": "+32 2 725 49 97", "web": "N/A", "contact": "Attaché administratif", "title": "Chef Section Consulaire", "email": "Via consulat", "employees": "20-30", "potential": "Faible-moyen", "status": "À contacter", "notes": "Av. Tervuren.", "lat": 50.840064, "lon": 4.417752}, {"cat": "8. Ambassades", "name": "Ambassade São Tomé", "sector": "Diplomatie", "address": "Av. de Tervueren 175, 1150 WSP", "phone": "+32 2 734 89 66", "web": "N/A", "contact": "Chargé d'affaires", "title": "Chargé d'Affaires", "email": "Via ambassade", "employees": "5-10", "potential": "Faible", "status": "À contacter", "notes": "Très petite structure.", "lat": 50.840237, "lon": 4.405544}, {"cat": "9. Pharma & Biotech", "name": "Pileje Benelux", "sector": "Compléments / Micronutrition", "address": "Av. de Broqueville 12, 1150 WSP", "phone": "+32 15 43 25 44", "web": "www.pileje.be", "contact": "Country Manager Benelux", "title": "DG Benelux", "email": "info@pileje.be", "employees": "15-25", "potential": "Moyen-élevé", "status": "À contacter", "notes": "Directement Montgomery ! Synergie santé naturelle.", "lat": 50.840597, "lon": 4.401278}, {"cat": "9. Pharma & Biotech", "name": "Betaplus Pharma", "sector": "Pharmacie / Médecine nucléaire", "address": "Av. Hippocrate 10, 1200 WSL", "phone": "+32 2 770 09 24", "web": "N/A", "contact": "Directeur Général", "title": "CEO", "email": "N/A", "employees": "20-40", "potential": "Moyen", "status": "À contacter", "notes": "Campus UCLouvain Woluwe.", "lat": 50.849218, "lon": 4.452306}, {"cat": "9. Pharma & Biotech", "name": "AUSTRAL Biologicals", "sector": "Biologie / Réactifs", "address": "Av. de l'Armée 68, 1040 Bruxelles", "phone": "+32 16 89 55 44", "web": "N/A", "contact": "Directeur scientifique", "title": "Scientific Director", "email": "N/A", "employees": "10-20", "potential": "Faible-moyen", "status": "À contacter", "notes": "Proximité Montgomery.", "lat": 50.835525, "lon": 4.398079}, {"cat": "10. Immobilier", "name": "Macnash Montgomery", "sector": "Agence immobilière", "address": "Av. de Broqueville 1, 1150 WSP", "phone": "+32 2 779 99 99", "web": "www.macnash.com", "contact": "Directeur d'agence", "title": "Directeur Agence", "email": "montgomery@macnash.com", "employees": "10-15", "potential": "Moyen", "status": "À contacter", "notes": "Directement Montgomery ! Effet ambassadeur.", "lat": 50.841557, "lon": 4.401061}, {"cat": "10. Immobilier", "name": "Tomson Properties", "sector": "Agence haut de gamme", "address": "Av. de l'Armée 41, 1040 Etterbeek", "phone": "+32 2 733 63 33", "web": "www.tomson-properties.be", "contact": "Directeur / Fondateur", "title": "CEO", "email": "info@tomson-properties.be", "employees": "5-10", "potential": "Faible-moyen", "status": "À contacter", "notes": "Haut de gamme. Synergie clientèle premium.", "lat": 50.834001, "lon": 4.397648}, {"cat": "10. Immobilier", "name": "ESPACE IMMO Brussels", "sector": "Agence immobilière", "address": "Av. de WSL 35, 1200 WSL", "phone": "+32 2 793 00 89", "web": "N/A", "contact": "Directeur d'agence", "title": "Directeur", "email": "N/A", "employees": "10-15", "potential": "Moyen", "status": "À contacter", "notes": "Proximité Montgomery.", "lat": 50.843039, "lon": 4.420858}, {"cat": "10. Immobilier", "name": "Maxime Real Estate", "sector": "Agence immobilière", "address": "Parv. Sainte-Alix 37, 1150 WSP", "phone": "+32 2 771 16 35", "web": "N/A", "contact": "Directeur / Fondateur", "title": "CEO", "email": "N/A", "employees": "5-10", "potential": "Faible-moyen", "status": "À contacter", "notes": "WSP. Approche terrain.", "lat": 50.838757, "lon": 4.414663}, {"cat": "11. PME & Coworking", "name": "The Nestwork Coworking", "sector": "Coworking", "address": "Av. de Broqueville 12, 1150 WSP", "phone": "+32 2 319 88 10", "web": "thenestwork.be", "contact": "Community Manager / Directeur", "title": "Directeur", "email": "info@thenestwork.be", "employees": "50-100 (coworkers)", "potential": "Élevé", "status": "À contacter", "notes": "Montgomery ! Partenariat B2B coworkers.", "lat": 50.840615, "lon": 4.400116}, {"cat": "11. PME & Coworking", "name": "TOPOS Coworking (Mérode)", "sector": "Coworking & bureaux", "address": "Rue Abbé Cuypers 3, 1040 Etterbeek", "phone": "+32 2 741 24 11", "web": "topos.be", "contact": "Community Manager", "title": "Directeur Mérode", "email": "merode@topos.be", "employees": "80-120 (coworkers)", "potential": "Élevé", "status": "À contacter", "notes": "Premium Mérode. Partenariat offre membre.", "lat": 50.835756, "lon": 4.390894}, {"cat": "11. PME & Coworking", "name": "Hive5 Mérode", "sector": "Coworking", "address": "Rue des Francs 79, 1040 Etterbeek", "phone": "+32 491 63 93 50", "web": "N/A", "contact": "Fondateur", "title": "Fondateur", "email": "N/A", "employees": "40-60 (coworkers)", "potential": "Moyen-élevé", "status": "À contacter", "notes": "Coworking créatif Mérode.", "lat": 50.835171, "lon": 4.390972}, {"cat": "11. PME & Coworking", "name": "My Square Montgomery", "sector": "Coworking & événements", "address": "Av. de Tervueren 128, 1150 Bruxelles", "phone": "+32 477 63 64 63", "web": "N/A", "contact": "Directeur", "title": "Directeur", "email": "N/A", "employees": "30-50 (coworkers)", "potential": "Moyen-élevé", "status": "À contacter", "notes": "Av. Tervuren Montgomery !", "lat": 50.838997, "lon": 4.403148}, {"cat": "11. PME & Coworking", "name": "Bright Plus (Recrutement)", "sector": "Agence de recrutement", "address": "Av. de Tervueren 270, 1150 WSP", "phone": "+32 2 289 06 90", "web": "www.brightplus.be", "contact": "Branch Manager", "title": "Directeur Agence", "email": "N/A", "employees": "20-30", "potential": "Moyen", "status": "À contacter", "notes": "Av. Tervuren. Recruteurs = réseau B2B.", "lat": 50.83978, "lon": 4.410557}, {"cat": "11. PME & Coworking", "name": "Gentis (Recrutement)", "sector": "Agence de recrutement IT", "address": "Bd de la Woluwe 2, 1150 WSP", "phone": "+32 2 737 51 60", "web": "N/A", "contact": "Branch Manager", "title": "Directeur Agence", "email": "N/A", "employees": "30-50", "potential": "Moyen", "status": "À contacter", "notes": "WSP. Consultants IT. Formule Starter.", "lat": 50.837951, "lon": 4.4131}, {"cat": "11. PME & Coworking", "name": "Notaire In-Deed", "sector": "Étude notariale", "address": "Av. de Tervueren 302, 1150 WSP", "phone": "+32 2 770 62 69", "web": "N/A", "contact": "Associé notaire", "title": "Notaire", "email": "N/A", "employees": "15-20", "potential": "Faible-moyen", "status": "À contacter", "notes": "Av. Tervuren. Étude notariale.", "lat": 50.838892, "lon": 4.411941}, {"cat": "11. PME & Coworking", "name": "Notaire Bouclier", "sector": "Étude notariale", "address": "Av. de Tervueren 32/34, 1040 Etterbeek", "phone": "+32 2 736 00 19", "web": "N/A", "contact": "Notaire principal", "title": "Notaire", "email": "N/A", "employees": "10-15", "potential": "Faible-moyen", "status": "À contacter", "notes": "Av. Tervuren. Étude notariale.", "lat": 50.839094, "lon": 4.398834}, {"cat": "11. PME & Coworking", "name": "Fidelium Accountants", "sector": "Expert-comptable", "address": "Bd Saint-Michel 65, 1040 Etterbeek", "phone": "+32 2 770 06 19", "web": "N/A", "contact": "Associé fondateur", "title": "Managing Partner", "email": "N/A", "employees": "10-15", "potential": "Faible-moyen", "status": "À contacter", "notes": "Proximité Montgomery. Fiduciaire.", "lat": 50.835079, "lon": 4.39646}, {"cat": "11. PME & Coworking", "name": "CFAG (Expert-comptable)", "sector": "Expert-comptable", "address": "Av. R. Vandendriessche 22, 1150 WSP", "phone": "+32 2 852 47 40", "web": "N/A", "contact": "Associé gérant", "title": "Gérant", "email": "N/A", "employees": "5-10", "potential": "Faible", "status": "À contacter", "notes": "WSP. Petite fiduciaire locale.", "lat": 50.838402, "lon": 4.411623}, {"cat": "11. PME & Coworking", "name": "ID.Cité Architects", "sector": "Architecture & Urbanisme", "address": "Av. de Tervueren 246, 1150 WSP", "phone": "+32 2 325 65 10", "web": "idcite.be", "contact": "Associé gérant", "title": "Managing Partner", "email": "info@idcite.be", "employees": "10-20", "potential": "Faible-moyen", "status": "À contacter", "notes": "Av. Tervuren. Formule Starter mini.", "lat": 50.839691, "lon": 4.409357}, {"cat": "11. PME & Coworking", "name": "Archi & Patri", "sector": "Architecture & Patrimoine", "address": "Rue P. Eudore Devroye 11, 1040 BXL", "phone": "+32 476 41 74 61", "web": "N/A", "contact": "Associé fondateur", "title": "Fondateur", "email": "N/A", "employees": "5-10", "potential": "Faible", "status": "À contacter", "notes": "PME archi locale.", "lat": 50.832876, "lon": 4.396035}, {"cat": "11. PME & Coworking", "name": "adn_ architectures", "sector": "Architecture", "address": "Rue François Gay 315, 1150 BXL", "phone": "+32 2 213 86 52", "web": "N/A", "contact": "Associé fondateur", "title": "Fondateur", "email": "N/A", "employees": "5-10", "potential": "Faible", "status": "À contacter", "notes": "Cabinet archi WSP.", "lat": 50.836242, "lon": 4.415449}, {"cat": "12. Écoles internationales", "name": "Montgomery Intl. School", "sector": "École bilingue", "address": "Rue du Duc 133, 1200 Bruxelles", "phone": "+32 2 733 63 23", "web": "www.mischool.be", "contact": "Directeur / Head of School", "title": "Directeur d'École", "email": "info@mischool.be", "employees": "30-50 (staff)", "potential": "Moyen", "status": "À contacter", "notes": "Directement Montgomery ! Staff enseignant & admin.", "lat": 50.842676, "lon": 4.408177}, {"cat": "12. Écoles internationales", "name": "École Européenne Bruxelles II", "sector": "École fonctionnaires EU", "address": "Av. Oscar Jespers 75, 1200 BXL", "phone": "+32 2 774 22 92", "web": "N/A", "contact": "Directeur administratif", "title": "Dir. Administratif", "email": "N/A", "employees": "100-150 (staff)", "potential": "Élevé", "status": "À contacter", "notes": "Personnel EU = allocation sport. Formule Business.", "lat": 50.84546, "lon": 4.43044}, {"cat": "12. Écoles internationales", "name": "Intl. Montessori Schools", "sector": "École Montessori intl.", "address": "Clos Hof ten Berg 22, 1200 WSL", "phone": "+32 2 669 90 80", "web": "N/A", "contact": "Directeur / Head of School", "title": "Directeur", "email": "N/A", "employees": "20-30 (staff)", "potential": "Faible-moyen", "status": "À contacter", "notes": "Petite école internationale Woluwe.", "lat": 50.844142, "lon": 4.440262}, {"cat": "13. Secteur médical", "name": "Europe Hospitals St-Michel", "sector": "Hôpital général", "address": "Rue de Linthout 150, 1040 Etterbeek", "phone": "+32 2 614 30 00", "web": "www.cliniquesdeleurope.be", "contact": "DRH", "title": "Directeur RH", "email": "Via site cliniques", "employees": "800+ (staff)", "potential": "Élevé", "status": "À contacter", "notes": "Proximité Montgomery. Personnel soignant off-peak.", "lat": 50.833458, "lon": 4.396811}, {"cat": "13. Secteur médical", "name": "Centre Médical Gribaumont", "sector": "Centre médical polyvalent", "address": "Av. de Broqueville 204, 1200 WSL", "phone": "+32 2 211 14 00", "web": "N/A", "contact": "Directeur du centre", "title": "Directeur", "email": "N/A", "employees": "30-50", "potential": "Moyen", "status": "À contacter", "notes": "Pros santé, prévention. Formule Starter.", "lat": 50.841719, "lon": 4.400142}, {"cat": "13. Secteur médical", "name": "Cliniques univ. Saint-Luc", "sector": "Hôpital universitaire", "address": "Av. Hippocrate 10, 1200 Bruxelles", "phone": "+32 2 764 11 11", "web": "www.saintluc.be", "contact": "DRH / Comité du Personnel", "title": "Directeur RH", "email": "Via site Saint-Luc", "employees": "5000+ (staff)", "potential": "Très élevé", "status": "À contacter", "notes": "Volume massif. Comité du personnel.", "lat": 50.848476, "lon": 4.453338}, {"cat": "13. Secteur médical", "name": "Dentisani Clinic", "sector": "Clinique dentaire", "address": "Av. de Tervueren 138, 1150 WSP", "phone": "+32 479 38 87 77", "web": "N/A", "contact": "Directeur / Dentiste principal", "title": "Directeur Clinique", "email": "N/A", "employees": "5-10", "potential": "Faible", "status": "À contacter", "notes": "Av. Tervuren Montgomery. Micro-entreprise.", "lat": 50.839634, "lon": 4.403852}, {"cat": "13. Secteur médical", "name": "Endo-Brussels", "sector": "Endodontie spécialisée", "address": "All. de la Minerva 2, 1150 WSP", "phone": "+32 2 732 41 46", "web": "N/A", "contact": "Directeur clinique", "title": "Directeur", "email": "N/A", "employees": "10-15", "potential": "Faible-moyen", "status": "À contacter", "notes": "WSP. Cabinet spécialisé.", "lat": 50.838871, "lon": 4.407142}, {"cat": "14. Think tanks & Fédérations", "name": "BusinessEurope", "sector": "Fédération patronale EU", "address": "Av. de Cortenbergh 168, 1000 BXL", "phone": "+32 2 237 65 11", "web": "www.businesseurope.eu", "contact": "Head of HR", "title": "Directeur RH", "email": "main@businesseurope.eu", "employees": "40-60", "potential": "Moyen-élevé", "status": "À contacter", "notes": "Grande fédération patronale quartier EU.", "lat": 50.843945, "lon": 4.383569}, {"cat": "14. Think tanks & Fédérations", "name": "Bruegel", "sector": "Think tank économique EU", "address": "Rue de la Charité 33, 1210 Bruxelles", "phone": "+32 2 227 42 10", "web": "www.bruegel.org", "contact": "Head of Administration", "title": "Chef Administration", "email": "info@bruegel.org", "employees": "30-40", "potential": "Moyen", "status": "À contacter", "notes": "Think tank de référence EU.", "lat": 50.848615, "lon": 4.363381}, {"cat": "14. Think tanks & Fédérations", "name": "ThinkYoung", "sector": "Think tank jeunesse", "address": "Rue Charles Martel 8, 1000 Bruxelles", "phone": "+32 2 608 82 10", "web": "N/A", "contact": "Directeur / Fondateur", "title": "CEO", "email": "N/A", "employees": "10-20", "potential": "Faible-moyen", "status": "À contacter", "notes": "Personnel jeune. Formule Starter mini.", "lat": 50.843194, "lon": 4.378862}, {"cat": "14. Think tanks & Fédérations", "name": "CER (European Railways)", "sector": "Fédération transports", "address": "Av. des Arts 53, 1000 Bruxelles", "phone": "+32 2 213 08 70", "web": "N/A", "contact": "Secrétaire Général", "title": "Secrétaire Général", "email": "N/A", "employees": "20-30", "potential": "Moyen", "status": "À contacter", "notes": "Fédération sectorielle quartier EU.", "lat": 50.844847, "lon": 4.371934}, {"cat": "14. Think tanks & Fédérations", "name": "FETSA", "sector": "Fédération stockage énergie", "address": "Rue Abbé Cuypers 3, 1040 Bruxelles", "phone": "+32 2 741 68 33", "web": "N/A", "contact": "Secrétaire Général", "title": "Secrétaire Général", "email": "N/A", "employees": "10-15", "potential": "Faible", "status": "À contacter", "notes": "Proximité Montgomery.", "lat": 50.835458, "lon": 4.390347}];
+
+var TIERS = [
+  {id:"ess",name:"Essential",price:189,color:"#D4A054",eng:"229 €",features:["Fitness heures creuses"]},
+  {id:"pre",name:"Premium",price:242,color:"#2A6DB5",featured:true,eng:"289 €",features:["Fitness illimité","Accès aux cours collectifs","Espace wellness : sauna, bain glacé & infrarouge","1 bilan fitness / an","Accès exclusif aux events du club"]},
+  {id:"eli",name:"Elite",price:299,color:"#6B5CE7",eng:"349 €",features:["Tout Premium inclus","Réservation prioritaire cours collectif","1 séance personal training / mois","Bilan fitness / trimestre","Peignoir de bain offert","1 invité / mois"]},
+  {id:"fou",name:"Founding",price:219,color:"#C75B2A",eng:"—",features:["= accès Premium complet","Tarif verrouillé à vie","Frais adhésion offerts","Limité 100 places"]},
+  {id:"cor",name:"Corporate",price:179,color:"#1A9E6F",eng:null,features:[]},
+  {id:"jeu",name:"Jeune",price:199,color:"#C4477A",eng:null,features:[]}
+];
+var TOTAL=600;
+var STATUSES=[
+  {id:"new",label:"À contacter",color:"#93C5FD",text:"#1E3A5F",bg:"#EFF6FF"},
+  {id:"msg_sent",label:"Message envoyé",color:"#FCD34D",text:"#713F12",bg:"#FFFBEB"},
+  {id:"reminder",label:"Rappel envoyé",color:"#FDBA74",text:"#7C2D12",bg:"#FFF7ED"},
+  {id:"response",label:"Réponse reçue",color:"#A78BFA",text:"#3B1F8B",bg:"#F5F3FF"},
+  {id:"rdv",label:"RDV planifié",color:"#67E8F9",text:"#155E75",bg:"#ECFEFF"},
+  {id:"visit",label:"Visite faite",color:"#86EFAC",text:"#14532D",bg:"#F0FDF4"},
+  {id:"won",label:"Gagné ✓",color:"#34D399",text:"#064E3B",bg:"#D1FAE5"},
+  {id:"lost",label:"Refusé ✗",color:"#FCA5A5",text:"#7F1D1D",bg:"#FEF2F2"},
+  {id:"pause",label:"En pause",color:"#D1D5DB",text:"#374151",bg:"#F3F4F6"}
+];
+var POT_COLORS={"Très élevé":{bg:"#D1FAE5",t:"#064E3B"},"Élevé":{bg:"#E0F2FE",t:"#0C4A6E"},"Moyen-élevé":{bg:"#FEF3C7",t:"#713F12"},"Moyen":{bg:"#FFF7ED",t:"#7C2D12"},"Faible-moyen":{bg:"#F3F4F6",t:"#374151"},"Faible":{bg:"#F9FAFB",t:"#6B7280"}};
+var CAT_ICONS={"1. Conseil & Big Four":"🏢","2. Institutions EU":"🇪🇺","3. Cabinets d'avocats":"⚖️","4. Finance & Banques":"🏦","5. Multinationales":"🌍","6. Tech & Digital":"💻","7. Lobbying & PA":"📢","8. Ambassades":"🏛️","9. Pharma & Biotech":"💊","10. Immobilier":"🏠","11. PME & Coworking":"🔧","12. Écoles internationales":"🎓","13. Secteur médical":"🏥","14. Think tanks & Fédérations":"🧠"};
+
+var MESSAGES=[
+  {canal:"LinkedIn — Demande de connexion",icon:"💬",color:"#2A6DB5",variants:[
+    {label:"Approche directe",text:"Bonjour [Prénom],\n\nJe me permets de vous contacter car nous ouvrons en août prochain un nouveau club de fitness premium Avenue de Tervueren, à deux pas de vos bureaux.\n\nNous développons un programme Corporate Wellness sur mesure et j'aimerais beaucoup échanger avec vous sur les besoins bien-être de vos équipes — sans engagement bien sûr.\n\nSeriez-vous disponible pour un café ou une visite de l'espace ?\n\nBien à vous,\n[Votre prénom]"},
+    {label:"Approche par la valeur",text:"Bonjour [Prénom],\n\nEn parcourant votre profil, j'ai vu que vous gérez les RH chez [Entreprise] — un voisin du quartier Montgomery !\n\nNous lançons un club fitness & wellness premium Avenue de Tervueren cet été, avec des programmes conçus pour les entreprises du quartier.\n\nJe serais ravi(e) de vous inviter à découvrir le concept autour d'un petit-déjeuner — aucune obligation.\n\nÀ bientôt j'espère,\n[Votre prénom]"}
+  ]},
+  {canal:"LinkedIn — Relance",icon:"🔄",color:"#6B5CE7",variants:[
+    {label:"Relance douce",text:"Merci d'avoir accepté ma demande, [Prénom] !\n\nNous proposons des formules Corporate avec tarifs préférentiels et frais d'adhésion offerts pour les entreprises du quartier.\n\nJe serais ravi(e) de vous envoyer notre brochure ou de vous accueillir pour une visite privée.\n\nQu'est-ce qui vous conviendrait le mieux ?"},
+    {label:"Preuve sociale",text:"Merci pour la connexion, [Prénom] !\n\nPlusieurs entreprises de Montgomery nous ont déjà contactés pour notre programme Corporate Wellness.\n\nL'idée : offrir à vos équipes un accès fitness, sauna et wellness à côté du bureau, avec facturation centralisée et chèques-sport.\n\n15 minutes d'appel suffiraient. Intéressé(e) ?"}
+  ]},
+  {canal:"E-mail — Événement",icon:"📧",color:"#D4A054",variants:[
+    {label:"Petit-déjeuner découverte",text:"Objet : Invitation exclusive — Découverte du nouveau club fitness & wellness de Montgomery\n\nBonjour [Prénom],\n\nNous organisons le [date] un petit-déjeuner découverte réservé aux responsables RH et dirigeants de Montgomery :\n\n• Visite privée de l'espace (30 min)\n• Présentation des formules entreprise et avantages fiscaux\n• Petit-déjeuner convivial et échanges\n\nPlaces limitées à 15 participants.\n\nCordialement,\n[Votre nom]\nCofondateur — Bonsai"},
+    {label:"Proposition partenariat",text:"Objet : Programme bien-être pour [Entreprise] — Nouveau club à Montgomery\n\nBonjour [Prénom],\n\nNous proposons aux entreprises du quartier des formules Corporate :\n\n• Tarifs préférentiels (jusqu'à -34 %)\n• Frais d'adhésion offerts\n• Facturation centralisée, compatible chèques-sport\n• Ateliers team-building inclus\n\nDisponible pour un appel la semaine du [date] ?\n\n[Votre nom]\nCofondateur — Bonsai"}
+  ]},
+  {canal:"E-mail EN — Institutions EU",icon:"🇪🇺",color:"#1A9E6F",variants:[
+    {label:"Staff Committee",text:"Subject: Staff sport & wellness — New premium club in Montgomery\n\nDear [Name],\n\nI am co-founder of Bonsai, opening August 2026 on Av. de Tervueren.\n\nOur Corporate Wellness programme for EU institutions includes:\n\n• Preferential rates from €159/month\n• Waived registration fees\n• 500 m² facility with fitness, classes, sauna & ice bath\n• Centralised invoicing compatible with staff welfare budgets\n• Quarterly wellness workshops\n\nWould a brief meeting work for you?\n\nKind regards,\n[Your name]\nCo-founder — Bonsai"}
+  ]},
+  {canal:"E-mail FR — Ambassades",icon:"🏛️",color:"#C4477A",variants:[
+    {label:"Note formelle",text:"Objet : Partenariat bien-être — Club fitness premium Avenue de Tervueren\n\nMadame, Monsieur,\n\nNous serions honorés de proposer une offre préférentielle au personnel de votre ambassade : tarifs réduits et flexibilité adaptée aux missions temporaires (sans engagement disponible).\n\nJe me tiens à votre disposition pour une présentation ou visite privée.\n\nVeuillez agréer mes salutations distinguées.\n\n[Votre nom]\nCofondateur — Bonsai"}
+  ]}
+];
+
+// STATE
+var state = {
+  mix: {ess:8,pre:54,eli:20,fou:8,cor:5,jeu:5},
+  statuses: loadJSON("bonsai_statuses") || initObj("new"),
+  notes: loadJSON("bonsai_notes") || initObj(""),
+  filterCat: "all",
+  filterStatus: "all",
+  expandedCat: null,
+  editingNote: -1,
+  activeCanal: 0,
+  activeVariant: 0,
+  syncStatus: FIREBASE_ON ? "connecting" : "local",
+  lastSync: null
+};
+
+function initObj(v){var o={};COMPANIES.forEach(function(_,i){o[i]=v});return o}
+function loadJSON(k){try{var s=localStorage.getItem(k);return s?JSON.parse(s):null}catch(e){return null}}
+function saveJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function fmt(n){return n.toLocaleString("fr-BE")}
+var db=null;
+
+// Firebase sync
+function initFirebase(){
+  if(!FIREBASE_ON) return;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db=firebase.database();
+    db.ref("prospects/statuses").on("value",function(s){
+      var d=s.val(); if(d){state.statuses=d;saveJSON("bonsai_statuses",d)}
+      state.syncStatus="synced";state.lastSync=new Date();render();
+    });
+    db.ref("prospects/notes").on("value",function(s){
+      var d=s.val(); if(d){state.notes=d;saveJSON("bonsai_notes",d);render()}
+    });
+  }catch(e){console.error("Firebase init failed:",e);state.syncStatus="local"}
+}
+
+function saveStatuses(){
+  saveJSON("bonsai_statuses",state.statuses);
+  if(db) db.ref("prospects/statuses").set(state.statuses);
+}
+function saveNotes(){
+  saveJSON("bonsai_notes",state.notes);
+  if(db) db.ref("prospects/notes").set(state.notes);
+}
+
+function calc(){
+  var rows=TIERS.map(function(t){
+    var p=state.mix[t.id]||0,m=Math.round(TOTAL*p/100),mr=m*t.price;
+    return {id:t.id,name:t.name,price:t.price,color:t.color,pct:p,members:m,mrr:mr,annual:mr*12};
+  });
+  var tm=0,tmr=0;rows.forEach(function(r){tm+=r.members;tmr+=r.mrr});
+  return {rows:rows,sum:Object.values(state.mix).reduce(function(a,b){return a+b},0),totalMRR:tmr,totalMembers:tm,avg:tm>0?tmr/tm:0,annual:tmr*12};
+}
+
+function h(tag,attrs,children){
+  var el=document.createElement(tag);
+  if(attrs)Object.keys(attrs).forEach(function(k){
+    if(k==="style"&&typeof attrs[k]==="object"){Object.assign(el.style,attrs[k])}
+    else if(k.startsWith("on")){el.addEventListener(k.slice(2).toLowerCase(),attrs[k])}
+    else if(k==="className"){el.className=attrs[k]}
+    else if(k==="innerHTML"){el.innerHTML=attrs[k]}
+    else el.setAttribute(k,attrs[k]);
+  });
+  if(children){
+    if(!Array.isArray(children))children=[children];
+    children.forEach(function(c){
+      if(c==null)return;
+      if(typeof c==="string"||typeof c==="number")el.appendChild(document.createTextNode(c));
+      else el.appendChild(c);
+    });
+  }
+  return el;
+}
+
+function render(){
+  var c=calc();
+  var app=document.getElementById("app");
+  app.innerHTML="";
+
+  // Firebase banner
+  if(!FIREBASE_ON){
+    app.appendChild(h("div",{className:"firebase-banner"},[
+      h("span",{style:{fontSize:"20px",flexShrink:"0"}},"⚡"),
+      h("div",null,[
+        h("div",{style:{fontSize:"14px",fontWeight:"700",color:"#92400E",marginBottom:"4px"}},"Mode local — Firebase non configuré"),
+        h("div",{style:{fontSize:"12px",color:"#A16207",lineHeight:"1.6"}},"Les données sont sauvegardées localement. Pour collaborer en temps réel, configurez Firebase (gratuit, 5 min).")
+      ])
+    ]));
+  }
+
+  // Header
+  var header=h("div",{style:{marginBottom:"2.5rem",borderBottom:"3px solid #C9A84C",paddingBottom:"1.2rem"}});
+  header.appendChild(h("h1",{className:"main"},"Synthèse stratégie pricing"));
+  header.appendChild(h("p",{style:{color:"#777",fontSize:"14px",marginTop:"6px"}},"Bonsai — Fitness Premium Montgomery · Avenue de Tervueren · 600 membres"));
+  app.appendChild(header);
+
+  // TIER CARDS
+  app.appendChild(h("h2",{className:"sec"},"Grille tarifaire — 4 niveaux d'abonnement"));
+  var tg=h("div",{className:"tiers"});
+  TIERS.slice(0,4).forEach(function(t){
+    var card=h("div",{className:"tier"+(t.featured?" featured":"")});
+    if(t.featured) card.appendChild(h("div",{className:"tier-badge"},"Offre de référence"));
+    card.appendChild(h("div",{className:"tier-name",style:{color:t.color}},t.name));
+    var pr=h("div",{className:"tier-price"});pr.innerHTML=t.price+' €<span>/mois</span>';card.appendChild(pr);
+    card.appendChild(h("div",{className:"tier-sub"},"12 mois · Sans eng. : "+t.eng));
+    var feat=h("div",{className:"tier-feat"});
+    t.features.forEach(function(f){var d=h("div");d.style.color=t.color.replace(/./g,function(c,i){return i?c:''});d.style.color="#555";d.textContent=f;feat.appendChild(d)});
+    card.appendChild(feat);
+    tg.appendChild(card);
+  });
+  app.appendChild(tg);
+
+  // Conditions
+  var cond=h("div",{className:"conditions"});
+  cond.innerHTML='<b>Conditions :</b> Frais d\'adhésion : 200 € (offerts Founding) · Jeune (-30 ans) : 199 €/mois · Duo : -15 % sur le 2ᵉ abonnement<br><span class="parr">Parrainage (Premium & Elite — 12 mois) :</span> 1 mois offert par nouveau membre parrainé · Frais d\'adhésion offerts pour le filleul';
+  app.appendChild(cond);
+
+  // SIMULATION
+  app.appendChild(h("h2",{className:"sec"},"Simulation du mix — 600 membres"));
+  app.appendChild(h("p",{style:{fontSize:"13px",color:"#888",marginBottom:"18px"}},"Ajustez les curseurs pour explorer différents scénarios."));
+
+  var simGrid=h("div",{className:"sim-grid"});
+  // Sliders
+  var sliderBox=h("div",{className:"slider-box"});
+  TIERS.forEach(function(t){
+    var row=h("div",{className:"slider-row"});
+    row.appendChild(h("div",{className:"dot",style:{background:t.color}}));
+    row.appendChild(h("label",null,t.name+" ("+t.price+" €)"));
+    var inp=h("input",{type:"range",min:"0",max:t.id==="pre"?"80":"30",value:String(state.mix[t.id]),style:{"--ac":t.color,accentColor:t.color}});
+    inp.addEventListener("input",function(e){state.mix[t.id]=parseInt(e.target.value);render()});
+    row.appendChild(inp);
+    row.appendChild(h("span",{className:"val"},state.mix[t.id]+" %"));
+    sliderBox.appendChild(row);
+  });
+  var pctEl=h("div",{className:"pct-total",style:{color:c.sum===100?"#1A9E6F":"#d44"}});
+  pctEl.textContent="Total : "+c.sum+" % "+(c.sum===100?"✓":"— ajustez pour 100 %");
+  sliderBox.appendChild(pctEl);
+  simGrid.appendChild(sliderBox);
+
+  // Metrics
+  var metGrid=h("div",{className:"metrics"});
+  [[true,"Prix moyen pondéré",Math.round(c.avg)+" €","/mois"],[false,"MRR abonnements",fmt(c.totalMRR)+" €",""],[false,"Revenu annuel",fmt(c.annual)+" €",""],[false,"Membres",String(c.totalMembers),""]].forEach(function(m){
+    var met=h("div",{className:"met "+(m[0]?"dark":"light")});
+    met.appendChild(h("div",{className:"met-label"},m[1]));
+    var v=h("div",{className:"met-val"});v.innerHTML=m[2]+(m[3]?'<span>'+m[3]+'</span>':"");met.appendChild(v);
+    metGrid.appendChild(met);
+  });
+  simGrid.appendChild(metGrid);
+  app.appendChild(simGrid);
+
+  // Bar
+  var bar=h("div",{className:"bar"});
+  c.rows.forEach(function(r){if(r.pct>0){bar.appendChild(h("div",{style:{width:r.pct+"%",background:r.color}},r.pct>=6?r.pct+"%":""))}});
+  app.appendChild(bar);
+
+  // Legend
+  var leg=h("div",{className:"legend"});
+  TIERS.forEach(function(t){var s=h("span");s.appendChild(h("span",{className:"ld",style:{background:t.color}}));s.appendChild(document.createTextNode(t.name+" "+state.mix[t.id]+"%"));leg.appendChild(s)});
+  app.appendChild(leg);
+
+  // Detail table
+  var tbl=h("table",{className:"calc-table"});
+  var thead=h("thead");var tr=h("tr");
+  ["Niveau","% mix","Membres","Prix unit.","Écart","MRR mensuel","Revenu annuel","% rev."].forEach(function(th){tr.appendChild(h("th",null,th))});
+  thead.appendChild(tr);tbl.appendChild(thead);
+  var tbody=h("tbody");
+  c.rows.forEach(function(r){
+    var tr=h("tr");var diff=r.price-242;
+    var td1=h("td");td1.appendChild(h("span",{style:{width:"8px",height:"8px",borderRadius:"2px",background:r.color,display:"inline-block"}}));td1.appendChild(document.createTextNode(" "+r.name));tr.appendChild(td1);
+    tr.appendChild(h("td",null,r.pct+" %"));tr.appendChild(h("td",null,String(r.members)));
+    tr.appendChild(h("td",{style:{fontWeight:"600"}},r.price+" €"));
+    tr.appendChild(h("td",{style:{color:diff>0?"#1A9E6F":diff<0?"#d44":"#999",fontWeight:"500"}},(diff>0?"+":"")+diff+" €"));
+    tr.appendChild(h("td",null,fmt(r.mrr)+" €"));tr.appendChild(h("td",null,fmt(r.annual)+" €"));
+    tr.appendChild(h("td",null,c.annual>0?((r.annual/c.annual)*100).toFixed(1)+" %":"0 %"));
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+  var tfoot=h("tfoot");var tfr=h("tr");
+  ["TOTAL",c.sum+" %",String(c.totalMembers),Math.round(c.avg)+" € moy.","—",fmt(c.totalMRR)+" €",fmt(c.annual)+" €","100 %"].forEach(function(v){tfr.appendChild(h("td",null,v))});
+  tfoot.appendChild(tfr);tbl.appendChild(tfoot);
+  app.appendChild(tbl);
+
+  // Formula
+  var form=h("div",{className:"formula"});
+  form.innerHTML='<strong>Étape 1</strong> — '+c.rows.map(function(r){return"("+r.members+"×"+r.price+")"}).join(" + ")+" = <strong>"+fmt(c.totalMRR)+" €/mois</strong><br><strong>Étape 2</strong> — "+fmt(c.totalMRR)+" ÷ "+c.totalMembers+" = <strong>"+c.avg.toFixed(2)+" €/mois</strong><br><strong>Étape 3</strong> — "+fmt(c.totalMRR)+" × 12 = <strong>"+fmt(c.annual)+" €/an</strong>";
+  app.appendChild(form);
+
+  // Why realistic
+  app.appendChild(h("h3",{style:{fontSize:"15px",fontWeight:"700",color:"#1B2A4A",marginBottom:"12px"}},"Pourquoi ce mix est réaliste"));
+  var wg=h("div",{className:"why-grid"});
+  [{t:"Premium à 54 %",c:"#2A6DB5",d:"Tier de référence. 50-60 % est la norme premium. 324 membres sur 600 est cohérent."},{t:"Elite à 20 %",c:"#6B5CE7",d:"120 membres à 299 € compensent les tiers réduits. La séance PT incluse (val. 75 €) crée un fort différentiel."},{t:"Segments réduits : 18 %",c:"#C75B2A",d:"Founding (48 actifs an 3), Corporate (30 employés) et Jeune (30) nourrissent la communauté sans diluer."}].forEach(function(w){
+    var card=h("div",{className:"why-card",style:{borderTop:"3px solid "+w.c}});
+    card.appendChild(h("div",{className:"wt",style:{color:w.c}},w.t));card.appendChild(h("div",{className:"wd"},w.d));wg.appendChild(card);
+  });
+  app.appendChild(wg);
+
+  // ======= B2B SECTION =======
+  app.appendChild(h("div",{className:"divider"}));
+  app.appendChild(h("h1",{className:"main"},"Stratégie B2B & kit de prospection"));
+  app.appendChild(h("p",{className:"sub"},"Timing, approche par cible et modèles de messages"));
+
+  // Timeline
+  app.appendChild(h("h2",{className:"sec"},"Timing idéal de prospection"));
+  var tl=h("div",{className:"timeline"});
+  [{p:"Avr — Mai 2026",ph:"Pré-lancement",c:"#D4A054",i:"🎯",a:["Site web + réseaux sociaux","Liste d'attente","Campagne Founding Members","Prospection B2B institutions EU"]},{p:"Juin — Juil 2026",ph:"Accélération",c:"#2A6DB5",i:"🚀",a:["Clôture 100 Founding","Premiers contrats Corporate","Événement chantier VIP","Formation coachs"]},{p:"Août 2026",ph:"Ouverture",c:"#6B5CE7",i:"🎉",a:["Semaine d'ouverture events","Early-bird : adhésion 99 €","Activation parrainage","Pass découverte 49 €/7j"]},{p:"Sept — Déc 2026",ph:"Croissance",c:"#1A9E6F",i:"📈",a:["Rentrée : -50 % adhésion","Lancement PT & nutrition","Portes ouvertes (oct)","Offre New Year (déc)"]}].forEach(function(t,i){
+    var col=h("div");
+    var hd=h("div",{className:"tl-header",style:{background:t.c,borderRadius:i===0?"12px 0 0 0":i===3?"0 12px 0 0":""}});
+    hd.appendChild(h("span",{style:{fontSize:"20px"}},t.i));
+    var info=h("div");info.appendChild(h("div",{className:"tp"},t.p));info.appendChild(h("div",{className:"tph"},t.ph));hd.appendChild(info);
+    col.appendChild(hd);
+    var bd=h("div",{className:"tl-body",style:{borderRadius:i===0?"0 0 0 12px":i===3?"0 0 12px 0":""}});
+    t.a.forEach(function(a){var d=h("div");d.style.color=t.c;d.style.setProperty("color","#555");d.textContent=a;bd.appendChild(d)});
+    col.appendChild(bd);tl.appendChild(col);
+  });
+  app.appendChild(tl);
+
+  // Approach by target
+  app.appendChild(h("h2",{className:"sec"},"Stratégie d'approche par cible"));
+  var apGrid=h("div",{className:"approach"});
+  [{t:"Institutions EU",cn:"E-mail EN au Staff Committee",m:"Programme Corporate Wellness dédié",o:"Corporate 199 €/pers. Frais offerts.",c:"#2A6DB5",i:"🇪🇺"},{t:"Cabinets d'avocats",cn:"LinkedIn → Office Manager / HR",m:"Fitness premium à côté du bureau",o:"Invitation visite + petit-déjeuner.",c:"#6B5CE7",i:"⚖️"},{t:"Finance & Banques",cn:"LinkedIn + e-mail au Directeur",m:"Synergie clientèle premium, networking",o:"Partenariat réciproque.",c:"#1A9E6F",i:"🏦"},{t:"Tech & Digital",cn:"LinkedIn → People Ops",m:"Budgets well-being élevés",o:"Corporate Plus + team-building.",c:"#C75B2A",i:"💻"},{t:"Ambassades",cn:"Note verbale au Chef de Chancellerie",m:"Flexibilité missions diplomatiques",o:"Sans engagement 289 €.",c:"#D4A054",i:"🏛️"},{t:"PME & Coworking",cn:"Visite terrain + Community Manager",m:"Complémentarité sport + travail",o:"Pass Flex 25 €/séance.",c:"#C4477A",i:"🏢"}].forEach(function(a){
+    var card=h("div",{className:"ap-card"});
+    var hd=h("div",{className:"ap-head",style:{background:a.c}});hd.appendChild(h("span",{style:{fontSize:"18px"}},a.i));hd.appendChild(document.createTextNode(a.t));card.appendChild(hd);
+    var bd=h("div",{className:"ap-body"});
+    bd.appendChild(h("div",{className:"apl"},"Canal prioritaire"));bd.appendChild(h("div",{className:"apv"},a.cn));
+    bd.appendChild(h("div",{className:"apl"},"Message clé"));bd.appendChild(h("div",{className:"apv",style:{fontStyle:"italic"}},a.m));
+    var of2=h("div",{className:"ap-offer"});of2.appendChild(h("div",{className:"apl"},"Offre spécifique"));of2.appendChild(h("div",{className:"apo",style:{color:a.c}},a.o));bd.appendChild(of2);
+    card.appendChild(bd);apGrid.appendChild(card);
+  });
+  app.appendChild(apGrid);
+
+  // Messages kit
+  app.appendChild(h("h2",{className:"sec"},"Kit de prospection — Modèles de messages"));
+  var msgWrap=h("div",{className:"msg-wrap"});
+  var tabs=h("div",{className:"msg-tabs"});
+  MESSAGES.forEach(function(m,i){
+    var tab=h("button",{className:"msg-tab"+(state.activeCanal===i?" active":""),style:{"--tc":m.color,color:state.activeCanal===i?m.color:"#888",borderBottomColor:state.activeCanal===i?m.color:"transparent"},onClick:function(){state.activeCanal=i;state.activeVariant=0;render()}});
+    tab.appendChild(h("span",{style:{fontSize:"14px"}},m.icon));tab.appendChild(document.createTextNode(m.canal));tabs.appendChild(tab);
+  });
+  msgWrap.appendChild(tabs);
+  var msgBody=h("div",{style:{padding:"20px 24px"}});
+  var cm2=MESSAGES[state.activeCanal];
+  if(cm2.variants.length>1){
+    var vr=h("div",{className:"msg-variants"});
+    cm2.variants.forEach(function(v,i){
+      vr.appendChild(h("button",{className:"msg-pill",style:{background:state.activeVariant===i?cm2.color:"#f0f0f0",color:state.activeVariant===i?"#fff":"#666"},onClick:function(){state.activeVariant=i;render()}},v.label));
+    });
+    msgBody.appendChild(vr);
+  }
+  msgBody.appendChild(h("div",{className:"msg-content"},cm2.variants[state.activeVariant].text));
+  msgBody.appendChild(h("div",{style:{marginTop:"10px",fontSize:"11px",color:"#bbb",textAlign:"right"}},"Sélectionnez le texte pour le copier-coller"));
+  msgWrap.appendChild(msgBody);
+  app.appendChild(msgWrap);
+
+  // Sequence
+  var seq=h("div",{className:"seq"});
+  seq.appendChild(h("div",{className:"seq-title"},"Séquence de prospection recommandée"));
+  var steps=h("div",{className:"seq-steps"});
+  [{s:"J0",l:"LinkedIn — Demande de connexion",c:"#2A6DB5"},{s:"J+4",l:"LinkedIn — Relance",c:"#6B5CE7"},{s:"J+7",l:"E-mail formel personnalisé",c:"#D4A054"},{s:"J+14",l:"Appel ou 2ᵉ e-mail",c:"#C75B2A"}].forEach(function(s,i){
+    var st=h("div",{className:"seq-step",style:{background:s.c}});st.appendChild(h("div",{className:"ss-d"},s.s));st.appendChild(h("div",{className:"ss-l"},s.l));steps.appendChild(st);
+    if(i<3)steps.appendChild(h("span",{className:"seq-arrow"},"→"));
+  });
+  seq.appendChild(steps);
+  seq.appendChild(h("div",{className:"seq-rule"},"Règle d'or : ne jamais communiquer le prix en premier. Chaque prospect doit d'abord expérimenter l'espace."));
+  app.appendChild(seq);
+
+  // ======= TRACKER SECTION =======
+  app.appendChild(h("div",{className:"divider"}));
+  app.appendChild(h("h1",{className:"main"},"Tracker de prospection B2B"));
+  app.appendChild(h("p",{className:"sub"},"91 entreprises cibles · Périmètre 3 km · Suivi en temps réel"));
+
+  // Interactive Map
+  var mapTitle=h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}});
+  var mtLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+  mtLeft.appendChild(h("span",{style:{fontSize:"24px"}},"🗺️"));
+  mtLeft.appendChild(h("span",{style:{fontSize:"16px",fontWeight:"700",color:"#1B2A4A"}},"Carte interactive — 91 cibles B2B · Périmètre 3 km"));
+  mapTitle.appendChild(mtLeft);
+  var statsRight=h("div",{style:{display:"flex",gap:"16px",fontSize:"12px",color:"#888"}});
+  var veryHigh=COMPANIES.filter(function(c2){return c2.potential==="Très élevé"}).length;
+  var high=COMPANIES.filter(function(c2){return c2.potential==="Élevé"}).length;
+  statsRight.innerHTML='<span><b style="color:#064E3B">'+veryHigh+'</b> très élevé</span><span><b style="color:#0C4A6E">'+high+'</b> élevé</span>';
+  mapTitle.appendChild(statsRight);
+  app.appendChild(mapTitle);
+
+  // Legend
+  var mapLeg=h("div",{className:"map-legend",id:"map-legend"});
+  app.appendChild(mapLeg);
+
+  // Map container - move persistent map into place
+  var mapHost=document.getElementById("map-host");
+  if(mapHost){mapHost.style.display="none";app.appendChild(mapHost);mapHost.style.display="block"}
+
+  // Init map after DOM is ready (only once)
+  if(!window._bonsaiMapInit){
+    window._bonsaiMapInit=true;
+    setTimeout(function(){
+    if(typeof L==="undefined"){console.error("Leaflet not loaded");return}
+    var mapEl=document.getElementById("bonsai-map");
+    if(!mapEl){console.error("Map element not found");return}
+    var map=L.map("bonsai-map",{scrollWheelZoom:false}).setView([50.8395,4.4045],14);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom:19
+    }).addTo(map);
+
+    // Bonsai location marker
+    var bonsaiIcon=L.divIcon({className:"",html:'<div style="width:28px;height:28px;background:#C9A84C;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px">🌿</div>',iconSize:[28,28],iconAnchor:[14,14]});
+    L.marker([50.8395,4.4045],{icon:bonsaiIcon}).addTo(map).bindPopup('<b>🌿 BONSAI</b><br>Avenue de Tervueren<br>Montgomery, WSP');
+
+    // Category colors
+    var catColors={"1. Conseil & Big Four":"#2A6DB5","2. Institutions EU":"#1A9E6F","3. Cabinets d'avocats":"#6B5CE7","4. Finance & Banques":"#D4A054","5. Multinationales":"#C75B2A","6. Tech & Digital":"#C4477A","7. Lobbying & PA":"#888","8. Ambassades":"#d44","9. Pharma & Biotech":"#34D399","10. Immobilier":"#67E8F9","11. PME & Coworking":"#FDBA74","12. Écoles internationales":"#A78BFA","13. Secteur médical":"#FCA5A5","14. Think tanks & Fédérations":"#93C5FD"};
+    var catLayers={};
+    var allMarkers=[];
+
+    COMPANIES.forEach(function(c2,i){
+      if(!c2.lat||!c2.lon) return;
+      var col=catColors[c2.cat]||"#888";
+      var potBg=(POT_COLORS[c2.potential]||{bg:"#eee"}).bg;
+      var potTxt=(POT_COLORS[c2.potential]||{t:"#333"}).t;
+      var icon=L.divIcon({className:"",html:'<div style="width:14px;height:14px;background:'+col+';border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.25)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+      var popup='<b>'+c2.name+'</b><div class="mp-sector">'+c2.sector+'</div>'
+        +'<div class="mp-row">📍 '+c2.address+'</div>'
+        +(c2.phone&&c2.phone!=="N/A"?'<div class="mp-row">📞 '+c2.phone+'</div>':"")
+        +'<div class="mp-row">👤 '+c2.contact+'</div>'
+        +'<div class="mp-row">👥 '+c2.employees+'</div>'
+        +'<div class="mp-row" style="margin-top:4px"><span style="background:'+potBg+';color:'+potTxt+';padding:2px 8px;border-radius:8px;font-weight:600;font-size:11px">'+c2.potential+'</span></div>';
+      var marker=L.marker([c2.lat,c2.lon],{icon:icon}).bindPopup(popup);
+      if(!catLayers[c2.cat]) catLayers[c2.cat]=L.layerGroup();
+      catLayers[c2.cat].addLayer(marker);
+      allMarkers.push(marker);
+    });
+
+    // Add all layers
+    Object.keys(catLayers).forEach(function(cat){catLayers[cat].addTo(map)});
+
+    // Build legend
+    var legend=document.getElementById("map-legend");
+    if(legend){
+      var activeFilters={};
+      Object.keys(catColors).forEach(function(cat){
+        activeFilters[cat]=true;
+        var cnt=COMPANIES.filter(function(c2){return c2.cat===cat}).length;
+        var sp=document.createElement("span");
+        sp.className="active";
+        sp.innerHTML='<span class="ml-dot" style="background:'+catColors[cat]+'"></span>'+cat.replace(/^\d+\.\s*/,"")+" ("+cnt+")";
+        sp.onclick=function(){
+          activeFilters[cat]=!activeFilters[cat];
+          sp.className=activeFilters[cat]?"active":"";
+          sp.style.opacity=activeFilters[cat]?"1":"0.3";
+          if(activeFilters[cat]){catLayers[cat].addTo(map)}else{map.removeLayer(catLayers[cat])}
+        };
+        legend.appendChild(sp);
+      });
+    }
+
+    // 3km circle
+    L.circle([50.8395,4.4045],{radius:3000,color:"#C9A84C",weight:1.5,fillColor:"#C9A84C",fillOpacity:0.04,dashArray:"8 4"}).addTo(map);
+
+    // Fit bounds
+    if(allMarkers.length>0){
+      var group=L.featureGroup(allMarkers);
+      map.fitBounds(group.getBounds().pad(0.1));
+    }
+  },300);
+  } // end if !_bonsaiMapInit
+
+  // Sync bar
+  var syncBg=FIREBASE_ON?(state.syncStatus==="synced"?"#F0FDF4":"#FEF3C7"):"#F3F4F6";
+  var syncBd=FIREBASE_ON?(state.syncStatus==="synced"?"1px solid #BBF7D0":"1px solid #FDE68A"):"1px solid #E5E7EB";
+  var syncDot=FIREBASE_ON?(state.syncStatus==="synced"?"#22C55E":"#F59E0B"):"#9CA3AF";
+  var syncTxt=FIREBASE_ON?(state.syncStatus==="synced"?"#166534":"#92400E"):"#374151";
+  var syncLbl=FIREBASE_ON?(state.syncStatus==="synced"?"Synchronisé en temps réel":"Connexion..."):"Mode hors-ligne (localStorage)";
+  var sb=h("div",{className:"sync-bar",style:{background:syncBg,border:syncBd}});
+  var sbLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
+  sbLeft.appendChild(h("div",{className:"sync-dot",style:{background:syncDot,animation:state.syncStatus==="connecting"?"pulse 1.5s infinite":"none"}}));
+  sbLeft.appendChild(h("span",{style:{fontSize:"12px",fontWeight:"600",color:syncTxt}},syncLbl));
+  sb.appendChild(sbLeft);
+  if(state.lastSync) sb.appendChild(h("span",{style:{fontSize:"11px",color:"#6B7280"}},"Sync : "+state.lastSync.toLocaleTimeString("fr-BE")));
+  app.appendChild(sb);
+
+  // Status pills
+  var pills=h("div",{className:"status-pills"});
+  var stCounts={};STATUSES.forEach(function(s2){stCounts[s2.id]=0});
+  Object.values(state.statuses).forEach(function(v){stCounts[v]=(stCounts[v]||0)+1});
+  STATUSES.forEach(function(s2){
+    var active=state.filterStatus===s2.id;
+    var pill=h("div",{className:"status-pill",style:{background:active?s2.color:s2.bg,color:s2.text,border:active?"2px solid "+s2.color:"1px solid #eee",opacity:state.filterStatus!=="all"&&!active?"0.5":"1"},onClick:function(){state.filterStatus=state.filterStatus===s2.id?"all":s2.id;render()}});
+    pill.textContent=s2.label+" "+stCounts[s2.id];pills.appendChild(pill);
+  });
+  if(state.filterStatus!=="all"){
+    pills.appendChild(h("div",{className:"status-pill",style:{background:"#fff",color:"#888",border:"1px solid #ddd"},onClick:function(){state.filterStatus="all";render()}},"Tout afficher ↺"));
+  }
+  app.appendChild(pills);
+
+  // Category filters
+  var cats=[...new Set(COMPANIES.map(function(c2){return c2.cat}))];
+  var cf=h("div",{className:"cat-filters"});
+  cf.appendChild(h("button",{className:"cat-btn",style:{background:state.filterCat==="all"?"#1B2A4A":"#f5f5f5",color:state.filterCat==="all"?"#fff":"#666"},onClick:function(){state.filterCat="all";render()}},"Toutes (91)"));
+  cats.forEach(function(cat){
+    var cnt=COMPANIES.filter(function(c2){return c2.cat===cat}).length;
+    cf.appendChild(h("button",{className:"cat-btn",style:{background:state.filterCat===cat?"#2A6DB5":"#f5f5f5",color:state.filterCat===cat?"#fff":"#666"},onClick:function(){state.filterCat=state.filterCat===cat?"all":cat;render()}},(CAT_ICONS[cat]||"")+" "+cat.replace(/^\d+\.\s*/,"")+" ("+cnt+")"));
+  });
+  app.appendChild(cf);
+
+  // Companies grouped
+  var filtered=COMPANIES.map(function(c2,i){return Object.assign({},c2,{idx:i})}).filter(function(c2){return state.filterCat==="all"||c2.cat===state.filterCat}).filter(function(c2){return state.filterStatus==="all"||state.statuses[c2.idx]===state.filterStatus});
+  var grouped={};filtered.forEach(function(c2){if(!grouped[c2.cat])grouped[c2.cat]=[];grouped[c2.cat].push(c2)});
+
+  Object.keys(grouped).forEach(function(cat){
+    var comps=grouped[cat];
+    var section=h("div",{style:{marginBottom:"16px"}});
+    var hdr=h("div",{className:"cat-header",style:{borderRadius:state.expandedCat===cat?"10px 10px 0 0":"10px"},onClick:function(){state.expandedCat=state.expandedCat===cat?null:cat;render()}});
+    var hdrLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
+    hdrLeft.appendChild(h("span",{style:{fontSize:"16px"}},CAT_ICONS[cat]||"📋"));
+    hdrLeft.appendChild(h("span",null,cat));
+    hdrLeft.appendChild(h("span",{className:"cnt"},"("+comps.length+")"));
+    hdr.appendChild(hdrLeft);
+    hdr.appendChild(h("span",{className:"arr",style:{transform:state.expandedCat===cat?"rotate(180deg)":"rotate(0)"}},"▾"));
+    section.appendChild(hdr);
+
+    if(state.expandedCat===cat){
+      var list=h("div",{style:{border:"1px solid #eee",borderTop:"none",borderRadius:"0 0 10px 10px",overflow:"hidden"}});
+      comps.forEach(function(c2,ci){
+        var st=STATUSES.find(function(s2){return s2.id===state.statuses[c2.idx]})||STATUSES[0];
+        var pot=POT_COLORS[c2.potential]||{bg:"#f5f5f5",t:"#666"};
+        var row=h("div",{className:"comp-row"});
+        var top=h("div",{style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"12px"}});
+        var left=h("div",{style:{flex:"1",minWidth:"0"}});
+        var nameRow=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"4px"}});
+        nameRow.appendChild(h("span",{className:"comp-name"},c2.name));
+        nameRow.appendChild(h("span",{className:"comp-pot",style:{background:pot.bg,color:pot.t}},c2.potential));
+        left.appendChild(nameRow);
+        left.appendChild(h("div",{className:"comp-sector"},c2.sector));
+        var det=h("div",{className:"comp-details"});
+        det.appendChild(h("span",null,"📍 "+c2.address));
+        if(c2.phone&&c2.phone!=="N/A") det.appendChild(h("span",null,"📞 "+c2.phone));
+        left.appendChild(det);
+        var det2=h("div",{className:"comp-details",style:{marginTop:"2px"}});
+        det2.appendChild(h("span",null,"👤 "+c2.contact+" — "+c2.title));
+        if(c2.employees) det2.appendChild(h("span",null,"👥 "+c2.employees));
+        left.appendChild(det2);
+        top.appendChild(left);
+
+        var right=h("div",{className:"comp-right"});
+        var sel=h("select",{className:"comp-select",style:{background:st.bg,color:st.text,border:"1.5px solid "+st.color},value:state.statuses[c2.idx],onChange:function(e){state.statuses[c2.idx]=e.target.value;saveStatuses();render()}});
+        STATUSES.forEach(function(s2){var opt=h("option",{value:s2.id},s2.label);if(s2.id===state.statuses[c2.idx])opt.selected=true;sel.appendChild(opt)});
+        right.appendChild(sel);
+        top.appendChild(right);
+        row.appendChild(top);
+
+        // Notes
+        var noteRow=h("div",{style:{marginTop:"6px",display:"flex",alignItems:"center",gap:"8px"}});
+        if(state.editingNote===c2.idx){
+          var inp=h("input",{className:"note-input",type:"text",value:state.notes[c2.idx]||"",placeholder:"Ajouter une note de suivi..."});
+          inp.addEventListener("input",function(e){state.notes[c2.idx]=e.target.value});
+          inp.addEventListener("keydown",function(e){if(e.key==="Enter"){state.editingNote=-1;saveNotes();render()}});
+          setTimeout(function(){inp.focus()},10);
+          noteRow.appendChild(inp);
+          noteRow.appendChild(h("button",{className:"note-ok",onClick:function(){state.editingNote=-1;saveNotes();render()}},"OK"));
+        }else{
+          var nf=h("div",{className:"note-field"+(state.notes[c2.idx]?"":" empty"),onClick:function(){state.editingNote=c2.idx;render()}});
+          nf.textContent=state.notes[c2.idx]||"＋ Cliquer pour ajouter une note...";
+          noteRow.appendChild(nf);
+        }
+        row.appendChild(noteRow);
+        list.appendChild(row);
+      });
+      section.appendChild(list);
+    }
+    app.appendChild(section);
+  });
+
+  if(filtered.length===0) app.appendChild(h("div",{className:"empty-msg"},"Aucune entreprise ne correspond aux filtres."));
+
+  // Action buttons
+  var btns=h("div",{className:"action-btns"});
+  btns.appendChild(h("button",{className:"btn-reset",onClick:function(){if(confirm("Réinitialiser tous les statuts ?")){state.statuses=initObj("new");saveStatuses();render();}}},"↺ Réinitialiser"));
+  btns.appendChild(h("button",{className:"btn-export",onClick:function(){
+    var lines=["Catégorie;Entreprise;Secteur;Adresse;Téléphone;Contact;Fonction;Email;Employés;Potentiel;Statut;Notes"];
+    COMPANIES.forEach(function(c2,i){var st=STATUSES.find(function(s2){return s2.id===state.statuses[i]});lines.push([c2.cat,c2.name,c2.sector,c2.address,c2.phone,c2.contact,c2.title,c2.email,c2.employees,c2.potential,st?st.label:"",String(state.notes[i]||"").replace(/;/g,",")].join(";"))});
+    var blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/csv;charset=utf-8"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="bonsai_prospects.csv";a.click();
+  }},"⬇ Exporter CSV"));
+  app.appendChild(btns);
+
+  app.appendChild(h("div",{className:"footer"},"Bonsai — Document confidentiel — Mars 2026"));
+}
+
+// Init
+document.addEventListener("DOMContentLoaded",function(){
+  if(FIREBASE_ON){
+    var checkFB=setInterval(function(){
+      if(typeof firebase!=="undefined"&&firebase.database){clearInterval(checkFB);initFirebase();render()}
+    },100);
+    setTimeout(function(){clearInterval(checkFB);state.syncStatus="local";render()},5000);
+  } else { render(); }
+});
+</script>
+</body>
+</html>
