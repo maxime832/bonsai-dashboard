@@ -140,24 +140,19 @@ h2.sec{font-family:'DM Serif Display',serif;font-size:22px;color:#1B2A4A;font-we
 .empty-msg{text-align:center;padding:40px;color:#bbb;font-size:14px}
 .footer{margin-top:32px;border-top:1px solid #eee;padding-top:12px;text-align:center;font-size:11px;color:#bbb}
 </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
   <style>
-    #bonsai-map{height:450px;border-radius:12px;border:1px solid #eee;margin-bottom:24px;z-index:0}
-    .leaflet-popup-content{font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.5}
-    .leaflet-popup-content b{color:#1B2A4A;font-size:13px}
-    .leaflet-popup-content .mp-sector{color:#888;font-size:11px;margin:2px 0 6px}
-    .leaflet-popup-content .mp-row{margin:2px 0;color:#555}
-    .map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;font-size:11px}
-    .map-legend span{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;background:#f5f5f5;cursor:pointer;transition:opacity .2s}
-    .map-legend span.active{outline:2px solid #1B2A4A}
-    .map-legend .ml-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .map-banner{display:block;text-decoration:none;margin-bottom:24px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#1B2A4A 0%,#2A4A7A 100%);padding:28px 32px;transition:transform .2s,box-shadow .2s;cursor:pointer}
+    .map-banner:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(27,42,74,.25)}
+    .map-stats{display:flex;gap:24px;margin-top:14px}
+    .map-stats div{display:flex;flex-direction:column}
+    .map-stats .ms-n{color:#C9A84C;font-size:22px;font-weight:700}
+    .map-stats .ms-l{color:rgba(255,255,255,.5);font-size:11px}
+    .map-btn{background:rgba(255,255,255,.15);border-radius:10px;padding:12px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0}
   </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
-<div class="wrap" id="map-host" style="display:none"><div id="bonsai-map"></div></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 <script>
 // ====== FIREBASE CONFIGURATION ======
@@ -311,13 +306,6 @@ function h(tag,attrs,children){
 function render(){
   var c=calc();
   var app=document.getElementById("app");
-  
-  // Save map-host before clearing (so Leaflet map survives re-renders)
-  var mapHost=document.getElementById("map-host");
-  if(mapHost && mapHost.parentNode===app){
-    document.body.appendChild(mapHost);
-    mapHost.style.display="none";
-  }
   
   app.innerHTML="";
 
@@ -514,111 +502,31 @@ function render(){
   app.appendChild(h("h1",{className:"main"},"Tracker de prospection B2B"));
   app.appendChild(h("p",{className:"sub"},"91 entreprises cibles · Périmètre 3 km · Suivi en temps réel"));
 
-  // Interactive Map
-  var mapTitle=h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}});
-  var mtLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
-  mtLeft.appendChild(h("span",{style:{fontSize:"24px"}},"🗺️"));
-  mtLeft.appendChild(h("span",{style:{fontSize:"16px",fontWeight:"700",color:"#1B2A4A"}},"Carte interactive — 91 cibles B2B · Périmètre 3 km"));
-  mapTitle.appendChild(mtLeft);
-  var statsRight=h("div",{style:{display:"flex",gap:"16px",fontSize:"12px",color:"#888"}});
+  // Map Banner Link
+  var mb=h("a",{href:"https://maxime832.github.io/b2b/map_b2b_montgomery_4",target:"_blank",className:"map-banner"});
+  var mbInner=h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"}});
+  var mbLeft=h("div");
+  var mbTitleRow=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}});
+  mbTitleRow.appendChild(h("span",{style:{fontSize:"28px"}},"🗺️"));
+  var mbTxt=h("div");
+  mbTxt.appendChild(h("div",{style:{color:"#fff",fontSize:"18px",fontWeight:"700"}},"Carte interactive — Cibles B2B Montgomery"));
+  mbTxt.appendChild(h("div",{style:{color:"rgba(255,255,255,.6)",fontSize:"13px"}},"Cliquez pour ouvrir la carte interactive — Périmètre 3 km"));
+  mbTitleRow.appendChild(mbTxt);
+  mbLeft.appendChild(mbTitleRow);
+  var mstats=h("div",{className:"map-stats"});
   var veryHigh=COMPANIES.filter(function(c2){return c2.potential==="Très élevé"}).length;
-  var high=COMPANIES.filter(function(c2){return c2.potential==="Élevé"}).length;
-  statsRight.innerHTML='<span><b style="color:#064E3B">'+veryHigh+'</b> très élevé</span><span><b style="color:#0C4A6E">'+high+'</b> élevé</span>';
-  mapTitle.appendChild(statsRight);
-  app.appendChild(mapTitle);
-
-  // Legend
-  var mapLeg=h("div",{className:"map-legend",id:"map-legend"});
-  app.appendChild(mapLeg);
-
-  // Map container - move persistent map into place
-  var mapHost=document.getElementById("map-host");
-  if(mapHost){app.appendChild(mapHost);mapHost.style.display="block";
-    // Tell Leaflet to recalculate after re-attachment
-    setTimeout(function(){
-      var mapEl=document.getElementById("bonsai-map");
-      if(mapEl && mapEl._leaflet_id){
-        var mapObj=mapEl._leaflet;
-        // Use Leaflet internal to invalidate
-        if(window._bonsaiMap) window._bonsaiMap.invalidateSize();
-      }
-    },50);
-  }
-
-  // Init map after DOM is ready (only once)
-  if(!window._bonsaiMapInit){
-    window._bonsaiMapInit=true;
-    setTimeout(function(){
-    if(typeof L==="undefined"){console.error("Leaflet not loaded");return}
-    var mapEl=document.getElementById("bonsai-map");
-    if(!mapEl){console.error("Map element not found");return}
-    var map=L.map("bonsai-map",{scrollWheelZoom:false}).setView([50.8395,4.4045],14);
-    window._bonsaiMap=map;
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom:19
-    }).addTo(map);
-
-    // Bonsai location marker
-    var bonsaiIcon=L.divIcon({className:"",html:'<div style="width:28px;height:28px;background:#C9A84C;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px">🌿</div>',iconSize:[28,28],iconAnchor:[14,14]});
-    L.marker([50.8395,4.4045],{icon:bonsaiIcon}).addTo(map).bindPopup('<b>🌿 BONSAI</b><br>Avenue de Tervueren<br>Montgomery, WSP');
-
-    // Category colors
-    var catColors={"1. Conseil & Big Four":"#2A6DB5","2. Institutions EU":"#1A9E6F","3. Cabinets d'avocats":"#6B5CE7","4. Finance & Banques":"#D4A054","5. Multinationales":"#C75B2A","6. Tech & Digital":"#C4477A","7. Lobbying & PA":"#888","8. Ambassades":"#d44","9. Pharma & Biotech":"#34D399","10. Immobilier":"#67E8F9","11. PME & Coworking":"#FDBA74","12. Écoles internationales":"#A78BFA","13. Secteur médical":"#FCA5A5","14. Think tanks & Fédérations":"#93C5FD"};
-    var catLayers={};
-    var allMarkers=[];
-
-    COMPANIES.forEach(function(c2,i){
-      if(!c2.lat||!c2.lon) return;
-      var col=catColors[c2.cat]||"#888";
-      var potBg=(POT_COLORS[c2.potential]||{bg:"#eee"}).bg;
-      var potTxt=(POT_COLORS[c2.potential]||{t:"#333"}).t;
-      var icon=L.divIcon({className:"",html:'<div style="width:14px;height:14px;background:'+col+';border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.25)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
-      var popup='<b>'+c2.name+'</b><div class="mp-sector">'+c2.sector+'</div>'
-        +'<div class="mp-row">📍 '+c2.address+'</div>'
-        +(c2.phone&&c2.phone!=="N/A"?'<div class="mp-row">📞 '+c2.phone+'</div>':"")
-        +'<div class="mp-row">👤 '+c2.contact+'</div>'
-        +'<div class="mp-row">👥 '+c2.employees+'</div>'
-        +'<div class="mp-row" style="margin-top:4px"><span style="background:'+potBg+';color:'+potTxt+';padding:2px 8px;border-radius:8px;font-weight:600;font-size:11px">'+c2.potential+'</span></div>';
-      var marker=L.marker([c2.lat,c2.lon],{icon:icon}).bindPopup(popup);
-      if(!catLayers[c2.cat]) catLayers[c2.cat]=L.layerGroup();
-      catLayers[c2.cat].addLayer(marker);
-      allMarkers.push(marker);
-    });
-
-    // Add all layers
-    Object.keys(catLayers).forEach(function(cat){catLayers[cat].addTo(map)});
-
-    // Build legend
-    var legend=document.getElementById("map-legend");
-    if(legend){
-      var activeFilters={};
-      Object.keys(catColors).forEach(function(cat){
-        activeFilters[cat]=true;
-        var cnt=COMPANIES.filter(function(c2){return c2.cat===cat}).length;
-        var sp=document.createElement("span");
-        sp.className="active";
-        sp.innerHTML='<span class="ml-dot" style="background:'+catColors[cat]+'"></span>'+cat.replace(/^\d+\.\s*/,"")+" ("+cnt+")";
-        sp.onclick=function(){
-          activeFilters[cat]=!activeFilters[cat];
-          sp.className=activeFilters[cat]?"active":"";
-          sp.style.opacity=activeFilters[cat]?"1":"0.3";
-          if(activeFilters[cat]){catLayers[cat].addTo(map)}else{map.removeLayer(catLayers[cat])}
-        };
-        legend.appendChild(sp);
-      });
-    }
-
-    // 3km circle
-    L.circle([50.8395,4.4045],{radius:3000,color:"#C9A84C",weight:1.5,fillColor:"#C9A84C",fillOpacity:0.04,dashArray:"8 4"}).addTo(map);
-
-    // Fit bounds
-    if(allMarkers.length>0){
-      var group=L.featureGroup(allMarkers);
-      map.fitBounds(group.getBounds().pad(0.1));
-    }
-  },300);
-  } // end if !_bonsaiMapInit
+  var high2=COMPANIES.filter(function(c2){return c2.potential==="Élevé"}).length;
+  [{n:"91",l:"entreprises ciblées"},{n:"14",l:"catégories"},{n:"3 km",l:"périmètre"},{n:String(veryHigh),l:"potentiel très élevé"},{n:String(high2),l:"potentiel élevé"}].forEach(function(s2){
+    var d=h("div");d.appendChild(h("span",{className:"ms-n"},s2.n));d.appendChild(h("span",{className:"ms-l"},s2.l));mstats.appendChild(d);
+  });
+  mbLeft.appendChild(mstats);
+  mbInner.appendChild(mbLeft);
+  var mbBtn=h("div",{className:"map-btn"});
+  mbBtn.appendChild(h("span",{style:{color:"#fff",fontSize:"14px",fontWeight:"600"}},"Ouvrir la carte"));
+  mbBtn.appendChild(h("span",{style:{color:"#C9A84C",fontSize:"20px"}},"↗"));
+  mbInner.appendChild(mbBtn);
+  mb.appendChild(mbInner);
+  app.appendChild(mb);
 
   // Sync bar
   var syncBg=FIREBASE_ON?(state.syncStatus==="synced"?"#F0FDF4":"#FEF3C7"):"#F3F4F6";
