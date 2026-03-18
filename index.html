@@ -311,6 +311,14 @@ function h(tag,attrs,children){
 function render(){
   var c=calc();
   var app=document.getElementById("app");
+  
+  // Save map-host before clearing (so Leaflet map survives re-renders)
+  var mapHost=document.getElementById("map-host");
+  if(mapHost && mapHost.parentNode===app){
+    document.body.appendChild(mapHost);
+    mapHost.style.display="none";
+  }
+  
   app.innerHTML="";
 
   // Firebase banner
@@ -525,7 +533,17 @@ function render(){
 
   // Map container - move persistent map into place
   var mapHost=document.getElementById("map-host");
-  if(mapHost){mapHost.style.display="none";app.appendChild(mapHost);mapHost.style.display="block"}
+  if(mapHost){app.appendChild(mapHost);mapHost.style.display="block";
+    // Tell Leaflet to recalculate after re-attachment
+    setTimeout(function(){
+      var mapEl=document.getElementById("bonsai-map");
+      if(mapEl && mapEl._leaflet_id){
+        var mapObj=mapEl._leaflet;
+        // Use Leaflet internal to invalidate
+        if(window._bonsaiMap) window._bonsaiMap.invalidateSize();
+      }
+    },50);
+  }
 
   // Init map after DOM is ready (only once)
   if(!window._bonsaiMapInit){
@@ -535,6 +553,7 @@ function render(){
     var mapEl=document.getElementById("bonsai-map");
     if(!mapEl){console.error("Map element not found");return}
     var map=L.map("bonsai-map",{scrollWheelZoom:false}).setView([50.8395,4.4045],14);
+    window._bonsaiMap=map;
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
       attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom:19
